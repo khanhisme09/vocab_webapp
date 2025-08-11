@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<h1>Register New Account</h1>
+<!-- th:object liên kết form với đối tượng "user" trong Model -->
+<form th:action="@{/register}" th:object="${user}" method="post">
+    <div>
+        <label for="username">Username:</label>
+        <!-- th:field liên kết input với thuộc tính của object -->
+        <input type="text" id="username" th:field="*{username}" required>
+    </div>
+    <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" th:field="*{email}" required>
+    </div>
+    <div>
+        <label for="password">Password:</label>
+        <input type="password" id="password" th:field="*{password}" required>
+    </div>
+    <div th:if="${param.error}">
+        <p style="color:red;">Username already exists!</p>
+    </div>
+    <button type="submit">Register</button>
+</form>
+</body>
+</html>

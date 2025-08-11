@@ -1,0 +1,67 @@
+/* File: src/main/resources/static/css/style.css */
+body {
+    background-color: #f8f9fa;
+    padding-top: 20px;
+    padding-bottom: 60px;
+}
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    transition: transform 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.progress {
+    height: 10px;
+    border-radius: 5px;
+}
+
+.list-group-item {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.list-group-item:hover {
+    background-color: #e9ecef;
+}
+
+.word-phonetic {
+    font-size: 1.2rem;
+    color: #6c757d;
+}
+
+.word-definition {
+    font-size: 1.4rem;
+    font-weight: 500;
+}
+
+.word-example {
+    font-style: italic;
+    border-left: 3px solid #0d6efd;
+    padding-left: 15px;
+}
+
+.stats-card {
+    text-align: center;
+    padding: 20px;
+}
+
+.stats-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.stats-label {
+    color: #6c757d;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}

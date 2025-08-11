@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" >
+<head>
+    <meta charset="UTF-8">
+    <title>Vocabulary Search</title>
+    <style>
+        /* Thêm một chút CSS đơn giản cho đẹp hơn */
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 80vh; flex-direction: column; }
+        form { display: flex; }
+        input[type="text"] { font-size: 1.2em; padding: 10px; width: 300px; }
+        button { font-size: 1.2em; padding: 10px; }
+    </style>
+</head>
+<body>
+<div sec:authorize="!isAuthenticated()">
+    <a th:href="@{/login}">Login</a> | <a th:href="@{/register}">Register</a>
+</div>
+<div sec:authorize="isAuthenticated()">
+    <span>Welcome, <b sec:authentication="name">Username</b>!</span>
+    <a th:href="@{/my-vocabulary}">My Vocabulary</a>
+    <form th:action="@{/logout}" method="post" style="display: inline;">
+        <button type="submit">Logout</button>
+    </form>
+</div>
+<h1>Vocabulary Search</h1>
+<!-- Form này sẽ gửi yêu cầu GET đến /search -->
+<form th:action="@{/search}" method="get">
+    <label>
+        <input type="text" name="query" placeholder="Enter a word..." required>
+    </label>
+    <button type="submit">Search</button>
+</form>
+</body>
+</html>

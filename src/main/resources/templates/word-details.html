@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Word Details</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; }
+        .word-header h1 { display: inline; margin-right: 20px;}
+        .phonetic { color: #555; }
+        .meaning-block { border-left: 4px solid #007bff; padding-left: 20px; margin-top: 30px; }
+        h3 { font-style: italic; color: #333; }
+        ul { list-style-type: disc; padding-left: 20px; }
+        li { margin-bottom: 10px; }
+        .example { color: #777; font-style: italic; margin-top: 5px; }
+        .error { color: red; }
+        a { color: #007bff; text-decoration: none; }
+    </style>
+</head>
+<body>
+<a href="/">&larr; Back to Search</a>
+
+<!-- Khối này chỉ hiển thị nếu có lỗi (biến 'error' tồn tại trong model) -->
+<div th:if="${error}">
+    <h2 class="error" th:text="${error}">Error message will be here</h2>
+</div>
+
+<!-- Khối này chỉ hiển thị nếu có dữ liệu (biến 'wordData' tồn tại trong model) -->
+<div th:if="${wordData}">
+    <!-- Header hiển thị từ và phiên âm -->
+    <div class="word-header">
+        <h1 th:text="${wordData.word}">Word</h1>
+
+        <span class="phonetic" th:text="${wordData.phonetics[0]?.text}">/fəˈnɛtɪk/</span>
+        <!-- Nút nghe audio, chỉ hiển thị nếu có link audio -->
+        <audio th:if="${wordData.phonetics[0]?.audio}" controls th:src="${wordData.phonetics[0].audio}">
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+
+    <div sec:authorize="isAuthenticated()"> <!-- Khối này chỉ hiển thị khi người dùng đã đăng nhập -->
+        <form th:action="@{/my-vocabulary/add}" method="post" style="display: inline;">
+            <!-- Gửi đi từ đang xem -->
+            <input type="hidden" name="word" th:value="${wordData.word}">
+            <button type="submit">Save to My List</button>
+        </form>
+    </div>
+
+    <!-- Dùng th:each để lặp qua từng "meaning" (loại từ) -->
+    <div th:each="meaning : ${wordData.meanings}" class="meaning-block">
+        <h3 th:text="${meaning.partOfSpeech}">Part of Speech</h3>
+        <ul>
+            <!-- Lồng một vòng lặp th:each khác để lặp qua từng "definition" -->
+            <li th:each="def : ${meaning.definitions}">
+                <span th:text="${def.definition}">This is the definition of the word.</span>
+                <!-- Hiển thị ví dụ nếu có -->
+                <div th:if="${def.example}" class="example">
+                    " <span th:text="${def.example}">Example sentence.</span> "
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>

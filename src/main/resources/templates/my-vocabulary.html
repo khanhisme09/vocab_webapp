@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<h1>My Vocabulary List</h1>
+<a th:href="@{/}">Back to Home</a>
+<ul>
+    <li th:each="item : ${vocabularyList}">
+        <a th:href="@{/search(query=${item.word.wordText})}" th:text="${item.word.wordText}">Word</a>
+        - <span th:text="${#temporals.format(item.addedDate, 'dd-MM-yyyy HH:mm')}"></span>
+    </li>
+</ul>
+</body>
+</html>
