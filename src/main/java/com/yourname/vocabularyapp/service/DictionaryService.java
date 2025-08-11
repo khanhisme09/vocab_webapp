@@ -32,4 +32,12 @@ public class DictionaryService {
         }
     }
 
+    public String getFirstDefinition(String word) {
+        WordApiResponseDto[] response = lookupWord(word);
+        if (response != null && response.length > 0) {
+            return response[0].getMeanings().get(0).getDefinitions().get(0).getDefinition();
+        }
+        return null;
+    }
+
 }

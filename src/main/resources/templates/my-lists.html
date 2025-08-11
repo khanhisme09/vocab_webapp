@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>My Vocabulary Lists</title>
+</head>
+<body>
+<h1>My Vocabulary Lists</h1>
+<a th:href="@{/}">Back to Home</a>
+<ul>
+    <li th:each="list : ${lists}">
+        <!-- URL được đổi sang /my-lists/{listId} -->
+        <a th:href="@{/my-lists/{listId}(listId=${list.id})}" th:text="${list.name}">List Name</a>
+        <!-- Biến được đổi từ set.words sang list.words -->
+        (<span th:text="${#lists.size(list.words)}">0</span> words)
+    </li>
+</ul>
+<!-- Biến được đổi từ sets sang lists -->
+<div th:if="${#lists.isEmpty(lists)}">
+    <p>You haven't created any vocabulary lists yet.</p>
+</div>
+</body>
+</html>

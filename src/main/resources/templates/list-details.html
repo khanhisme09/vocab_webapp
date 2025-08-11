@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>List Details</title>
+</head>
+<body>
+<h1 th:text="'Words in \'' + ${list.name} + '\''">List Details</h1>
+<a th:href="@{/my-lists}">Back to All Lists</a>
+<ul>
+    <li th:each="word : ${list.words}">
+        <a th:href="@{/search(query=${word.wordText})}" th:text="${word.wordText}">Word</a>
+    </li>
+</ul>
+<div th:if="${#lists.isEmpty(list.words)}">
+    <p>This list is empty.</p>
+</div>
+</body>
+</html>

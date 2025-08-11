@@ -1,25 +1,37 @@
 package com.yourname.vocabularyapp.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+// import lombok.Data; // <-- XÓA HOẶC COMMENT DÒNG NÀY
+import lombok.Getter;   // <-- THÊM CÁC IMPORT NÀY
+import lombok.Setter;
+import lombok.ToString;
+import lombok.EqualsAndHashCode;
+
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 @Entity
-@Table(name = "users") // Tên của bảng trong CSDL
-@Data // Lombok: tự tạo getters, setters, equals, hashCode, toString
-@NoArgsConstructor // Lombok: tự tạo constructor không tham số
+@Table(name = "users")
+@Getter
+@Setter
+@NoArgsConstructor
+@ToString(exclude = "vocabularyLists")
+@EqualsAndHashCode(exclude = "vocabularyLists")
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // ID tự tăng
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true) // Không được null, không được trùng
+    @Column(nullable = false, unique = true)
     private String username;
 
     @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false)
-    private String password; // Mật khẩu này sẽ được mã hóa
+    private String password;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<VocabularyList> vocabularyLists;
 }
