@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<h1>Quiz in Progress</h1>
+<form th:action="@{/quiz/submit}" method="post">
+    <!-- Dùng th:each để lặp qua từng câu hỏi -->
+    <div th:each="question, iterStat : ${questions}" style="margin-bottom: 20px;">
+        <p th:text="${iterStat.count} + '. What is the word for: \'' + ${question.questionText} + '\''"></p>
+        <!-- Dùng th:each lặp qua các lựa chọn -->
+        <div th:each="option : ${question.options}">
+            <!-- Quan trọng: name phải có index để Spring có thể map thành Map<Integer, String> -->
+            <input type="radio" th:id="${iterStat.index} + '-' + ${option}" th:name="${'answers[' + iterStat.index + ']'}" th:value="${option}" required>
+            <label th:for="${iterStat.index} + '-' + ${option}" th:text="${option}"></label>
+        </div>
+    </div>
+    <button type="submit">Submit Answers</button>
+</form>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<h1>Quiz Result</h1>
+<h2>You scored: <span th:text="${result.score}">0</span> out of <span th:text="${result.totalQuestions}">0</span></h2>
+
+<a th:href="@{/quiz}">Try another quiz</a>
+<br>
+<a th:href="@{/}">Back to Home</a>
+</body>
+</html>

@@ -23,7 +23,8 @@
     <div sec:authorize="isAuthenticated()">
         <span>Welcome, <b sec:authentication="name">Username</b>!</span> |
 
-        <a th:href="@{/my-lists}">My Lists</a> |
+        <a th:href="@{/my-lists}">My Lists</a>
+        <a th:href="@{/quiz}">Practice Quiz</a>|
 
         <form th:action="@{/logout}" method="post" style="display: inline;">
             <button type="submit">Logout</button>
