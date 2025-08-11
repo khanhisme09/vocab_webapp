@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Error</title>
+</head>
+<body>
+<h1>Oops! Something went wrong.</h1>
+<p th:text="${errorMessage}">Default error message.</p>
+<!-- Dòng này chỉ nên hiển thị trong môi trường phát triển -->
+<!-- <pre th:text="${errorDetails}"></pre> -->
+<a th:href="@{/}">Go back to Home Page</a>
+</body>
+</html>

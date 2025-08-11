@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>My Dashboard</title>
+    <!-- Tích hợp Chart.js từ CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .dashboard-container { max-width: 900px; margin: 40px auto; }
+        .stats-summary { display: flex; justify-content: space-around; margin-bottom: 40px; }
+        .stat-card { padding: 20px; border: 1px solid #ccc; border-radius: 8px; text-align: center; }
+        .stat-card h3 { margin-top: 0; }
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+    <h1>My Learning Dashboard</h1>
+    <a th:href="@{/}">Back to Home</a>
+
+    <div class="stats-summary">
+        <div class="stat-card">
+            <h3>Total Lists</h3>
+            <p id="total-lists">Loading...</p>
+        </div>
+        <div class="stat-card">
+            <h3>Total Unique Words</h3>
+            <p id="total-unique-words">Loading...</p>
+        </div>
+    </div>
+
+    <div>
+        <h3>Words per List</h3>
+        <!-- Thẻ canvas này là nơi biểu đồ sẽ được vẽ -->
+        <canvas id="wordsPerListChart"></canvas>
+    </div>
+</div>
+
+<script>
+    // Đảm bảo script chỉ chạy sau khi trang đã tải xong
+    document.addEventListener('DOMContentLoaded', function() {
+        // Gọi API backend
+        fetch('/dashboard/stats')
+            .then(response => response.json())
+            .then(data => {
+                // Cập nhật các số liệu đơn giản
+                document.getElementById('total-lists').innerText = data.totalLists;
+                document.getElementById('total-unique-words').innerText = data.totalUniqueWords;
+
+                // Chuẩn bị dữ liệu cho biểu đồ
+                const ctx = document.getElementById('wordsPerListChart').getContext('2d');
+                const labels = Object.keys(data.wordsPerList);
+                const chartData = Object.values(data.wordsPerList);
+
+                // Tạo biểu đồ
+                new Chart(ctx, {
+                    type: 'bar', // Loại biểu đồ là cột
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '# of Words',
+                            data: chartData,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching dashboard stats:', error));
+    });
+</script>
+</body>
+</html>
