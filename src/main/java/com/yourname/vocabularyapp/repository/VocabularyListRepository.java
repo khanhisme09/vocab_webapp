@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface VocabularyListRepository extends JpaRepository<VocabularyList, Long> {
-    @EntityGraph(attributePaths = {"words"})
+
+    // Cập nhật EntityGraph để tải cả ListWord và đối tượng Word bên trong nó
+    @EntityGraph(attributePaths = {"listWords.word"})
     List<VocabularyList> findByUser_Id(Long userId);
 
-    @EntityGraph(attributePaths = {"words"})
+    @EntityGraph(attributePaths = {"listWords.word"})
     Optional<VocabularyList> findWithWordsById(Long id);
 }

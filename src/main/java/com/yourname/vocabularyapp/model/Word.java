@@ -1,34 +1,32 @@
 package com.yourname.vocabularyapp.model;
 
 import jakarta.persistence.*;
-// import lombok.Data; // <-- XÓA HOẶC COMMENT DÒNG NÀY
-import lombok.Getter;   // <-- THÊM CÁC IMPORT NÀY
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.EqualsAndHashCode;
 
-import lombok.NoArgsConstructor;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "words")
-@Getter
-@Setter
-@NoArgsConstructor
-@ToString(exclude = "vocabularyLists")
-@EqualsAndHashCode(exclude = "vocabularyLists")
+@Getter @Setter @NoArgsConstructor
+@ToString(exclude = "listWords")
+@EqualsAndHashCode(exclude = "listWords")
 public class Word {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Đảm bảo không có 2 từ giống hệt nhau trong bảng
     @Column(nullable = false, unique = true)
     private String wordText;
 
-    @ManyToMany(mappedBy = "words")
-    private Set<VocabularyList> vocabularyLists;
+    // THAY ĐỔI Ở ĐÂY: Xóa @ManyToMany, thêm @OneToMany
+    @OneToMany(mappedBy = "word", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<ListWord> listWords = new HashSet<>();
 
     public Word(String wordText) {
         this.wordText = wordText;

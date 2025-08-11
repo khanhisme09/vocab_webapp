@@ -1,6 +1,5 @@
 package com.yourname.vocabularyapp.service;
 
-import com.yourname.vocabularyapp.dto.MeaningDto;
 import com.yourname.vocabularyapp.dto.WordApiResponseDto;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -38,6 +37,21 @@ public class DictionaryService {
             return response[0].getMeanings().get(0).getDefinitions().get(0).getDefinition();
         }
         return null;
+    }
+    // Trả về câu ví dụ đầu tiên tìm thấy của một từ
+    public String getFirstExample(String word) {
+        WordApiResponseDto[] response = lookupWord(word);
+        if (response != null && response.length > 0) {
+            // Duyệt qua các nghĩa và định nghĩa để tìm câu ví dụ đầu tiên có sẵn
+            for (var meaning : response[0].getMeanings()) {
+                for (var definition : meaning.getDefinitions()) {
+                    if (definition.getExample() != null && !definition.getExample().isBlank()) {
+                        return definition.getExample();
+                    }
+                }
+            }
+        }
+        return null; // Trả về null nếu không tìm thấy ví dụ nào
     }
 
 }

@@ -9,7 +9,15 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuizQuestionDto {
-    private String questionText; // Sẽ là một định nghĩa của từ
-    private List<String> options; // 4 lựa chọn (từ vựng)
-    private String correctAnswer; // Từ đúng (dùng để kiểm tra ở backend)
+
+    public enum QuestionType {
+        MULTIPLE_CHOICE,
+        FILL_IN_THE_BLANK
+    }
+
+    private Long listWordId; // ID của bản ghi trong bảng nối
+    private QuestionType type;
+    private String questionText;
+    private List<String> options;
+    private String correctAnswer;
 }

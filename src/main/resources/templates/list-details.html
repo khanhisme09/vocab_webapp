@@ -2,18 +2,53 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>List Details</title>
+    <title th:text="${list.name} + ' - List Details'">List Details</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; }
+        h1 { color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .back-link { display: inline-block; margin-bottom: 20px; }
+    </style>
 </head>
 <body>
 <h1 th:text="'Words in \'' + ${list.name} + '\''">List Details</h1>
-<a th:href="@{/my-lists}">Back to All Lists</a>
-<ul>
-    <li th:each="word : ${list.words}">
-        <a th:href="@{/search(query=${word.wordText})}" th:text="${word.wordText}">Word</a>
-    </li>
-</ul>
-<div th:if="${#lists.isEmpty(list.words)}">
-    <p>This list is empty.</p>
+<a th:href="@{/my-lists}" class="back-link">&larr; Back to All Lists</a>
+
+<!--
+    THAY ĐỔI Ở ĐÂY:
+    - Dùng bảng để hiển thị thông tin SRS một cách có cấu trúc.
+    - Vòng lặp th:each duyệt qua 'list.listWords'.
+    - Truy cập từ vựng qua 'listWord.word.wordText'.
+    - Hiển thị các trường SRS: 'listWord.srsLevel' và 'listWord.nextReviewDate'.
+-->
+<div th:if="${!#lists.isEmpty(list.listWords)}">
+    <table>
+        <thead>
+        <tr>
+            <th>Word</th>
+            <th>SRS Level</th>
+            <th>Next Review</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="listWord : ${list.listWords}">
+            <td>
+                <a th:href="@{/search(query=${listWord.word.wordText})}" th:text="${listWord.word.wordText}">Word</a>
+            </td>
+            <td th:text="${listWord.srsLevel}">0</td>
+            <td th:text="${#temporals.format(listWord.nextReviewDate, 'dd-MM-yyyy HH:mm')}">Date</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div th:if="${#lists.isEmpty(list.listWords)}">
+    <p>This list is empty. <a th:href="@{/}">Go search for words</a> to add them here!</p>
 </div>
 </body>
 </html>
