@@ -49,4 +49,17 @@ public class VocabularyListController {
         model.addAttribute("list", list);
         return "list-details";
     }
+
+    @PostMapping("/my-lists/{listId}/remove-word")
+    public String removeWordFromList(@PathVariable Long listId, @RequestParam Long wordId, Principal principal) {
+        listService.removeWordFromList(listId, wordId, principal.getName());
+        return "redirect:/my-lists/" + listId; // Tải lại trang chi tiết list
+    }
+
+    //edit list name
+    @PostMapping("/my-lists/{listId}/edit-name")
+    public String updateListName(@PathVariable Long listId, @RequestParam String newName, Principal principal) {
+        listService.updateListName(listId, newName, principal.getName());
+        return "redirect:/my-lists/" + listId; // Tải lại trang chi tiết list
+    }
 }

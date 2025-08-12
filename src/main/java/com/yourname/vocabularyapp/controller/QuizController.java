@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.Principal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -52,10 +53,30 @@ public class QuizController {
     }
 
     // Trang làm bài quiz
+//    @GetMapping("/quiz/do")
+//    public String doQuiz(HttpSession session, Model model) {
+//        List<QuizQuestionDto> questions = (List<QuizQuestionDto>) session.getAttribute("quizQuestions");
+//        if (questions == null || questions.isEmpty()) {
+//            return "redirect:/quiz";
+//        }
+//        model.addAttribute("questions", questions);
+//        model.addAttribute("quizAnswersForm", new QuizAnswersForm());
+//
+//        return "quiz";
+//    }
     @GetMapping("/quiz/do")
     public String doQuiz(HttpSession session, Model model) {
-        List<QuizQuestionDto> questions = (List<QuizQuestionDto>) session.getAttribute("quizQuestions");
-        if (questions == null || questions.isEmpty()) {
+        Object obj = session.getAttribute("quizQuestions");
+        List<QuizQuestionDto> questions = Collections.emptyList();
+
+        if (obj instanceof List<?>) {
+            questions = ((List<?>) obj).stream()
+                    .filter(QuizQuestionDto.class::isInstance)
+                    .map(QuizQuestionDto.class::cast)
+                    .toList();
+        }
+
+        if (questions.isEmpty()) {
             return "redirect:/quiz";
         }
         model.addAttribute("questions", questions);
@@ -63,6 +84,7 @@ public class QuizController {
 
         return "quiz";
     }
+
 
     @PostMapping("/quiz/submit")
     // THAY ĐỔI Ở ĐÂY: Dùng @ModelAttribute thay vì @RequestParam

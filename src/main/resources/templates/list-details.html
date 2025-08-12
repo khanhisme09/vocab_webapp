@@ -1,54 +1,105 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${list.name} + ' - List Details'">List Details</title>
+    <title th:text="${list.name} + ' - Vocabulary List'">List Details</title>
     <style>
-        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; }
-        h1 { color: #333; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; max-width: 960px; margin: 40px auto; color: #333; }
         a { color: #007bff; text-decoration: none; }
         a:hover { text-decoration: underline; }
         .back-link { display: inline-block; margin-bottom: 20px; }
+        .list-header h1 { margin-bottom: 5px; }
+        .list-header p { margin-top: 0; color: #6c757d; }
+        .action-bar { display: flex; gap: 15px; background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0; }
+        .action-button { background-color: #007bff; color: white; padding: 15px 25px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 1.1em; flex-grow: 1; }
+        .action-button:hover { background-color: #0056b3; color: white; text-decoration: none; }
+        .word-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .word-table th, .word-table td { border-bottom: 1px solid #ddd; padding: 12px; text-align: left; }
+        .word-table th { background-color: #f2f2f2; }
+        .word-table .word-column { font-weight: bold; }
+        .word-table .remove-btn { color: #dc3545; font-size: 0.9em; cursor: pointer; background: none; border: none; padding: 0; }
     </style>
 </head>
 <body>
-<h1 th:text="'Words in \'' + ${list.name} + '\''">List Details</h1>
-<a th:href="@{/my-lists}" class="back-link">&larr; Back to All Lists</a>
+<div th:with="listOwnerUsername=${list.user.username}">
 
-<!--
-    THAY ĐỔI Ở ĐÂY:
-    - Dùng bảng để hiển thị thông tin SRS một cách có cấu trúc.
-    - Vòng lặp th:each duyệt qua 'list.listWords'.
-    - Truy cập từ vựng qua 'listWord.word.wordText'.
-    - Hiển thị các trường SRS: 'listWord.srsLevel' và 'listWord.nextReviewDate'.
--->
-<div th:if="${!#lists.isEmpty(list.listWords)}">
-    <table>
-        <thead>
-        <tr>
-            <th>Word</th>
-            <th>SRS Level</th>
-            <th>Next Review</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="listWord : ${list.listWords}">
-            <td>
-                <a th:href="@{/search(query=${listWord.word.wordText})}" th:text="${listWord.word.wordText}">Word</a>
-            </td>
-            <td th:text="${listWord.srsLevel}">0</td>
-            <td th:text="${#temporals.format(listWord.nextReviewDate, 'dd-MM-yyyy HH:mm')}">Date</td>
-        </tr>
-        </tbody>
-    </table>
+    <a th:href="@{/my-lists}" class="back-link">&larr; Back to All Lists</a>
+
+    <div class="list-header">
+        <!-- ===== KHỐI HIỂN THỊ VÀ SỬA TÊN LIST ===== -->
+        <div id="list-name-display">
+            <h1 th:text="${list.name}" style="display: inline-block; margin-right: 15px;">List Name</h1>
+            <a href="#" id="edit-name-btn" onclick="toggleEditForm()" sec:authorize="isAuthenticated() and authentication.name == #vars.listOwnerUsername" style="font-size: 0.8em;">(Edit)</a>
+        </div>
+        <form id="edit-name-form" th:action="@{/my-lists/{listId}/edit-name(listId=${list.id})}" method="post" style="display:none; margin-top: 10px;">
+            <input type="text" name="newName" th:value="${list.name}" required>
+            <button type="submit">Save</button>
+            <a href="#" onclick="toggleEditForm()">Cancel</a>
+        </form>
+        <p th:text="'Created by ' + ${listOwnerUsername}">Created by User</p>
+    </div>
+
+    <div class="action-bar">
+        <a th:href="@{/lists/{listId}/flashcards(listId=${list.id})}" class="action-button">Practice with Flashcards</a>
+        <form th:action="@{/quiz/start}" method="post" style="flex-grow: 1; margin: 0;">
+            <input type="hidden" name="listId" th:value="${list.id}">
+            <button type="submit" class="action-button" style="width:100%; border:none;">Take a Quiz</button>
+        </form>
+    </div>
+
+    <!-- ===== FORM THÊM TỪ MỚI ===== -->
+    <div class="add-word-form" sec:authorize="isAuthenticated() and authentication.name == #vars.listOwnerUsername">
+        <form th:action="@{/my-lists/add-word}" method="post" style="display: flex; gap: 10px; align-items: center; margin-bottom: 25px;">
+            <input type="hidden" name="listId" th:value="${list.id}">
+            <input type="text" name="word" placeholder="Add a new word to this list..." required style="flex-grow: 1; padding: 10px; font-size: 1em;">
+            <button type="submit" style="padding: 10px 20px; font-size: 1em;">Add Word</button>
+        </form>
+    </div>
+
+    <h2>Word List (<span th:text="${#lists.size(list.listWords)}">0</span> words)</h2>
+    <div th:if="${!#lists.isEmpty(list.listWords)}">
+        <table class="word-table">
+            <thead>
+            <tr>
+                <th>Word</th>
+                <th>Definition (Placeholder)</th>
+                <th sec:authorize="isAuthenticated() and authentication.name == #vars.listOwnerUsername">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="listWord : ${list.listWords}">
+                <td class="word-column">
+                    <a th:href="@{/search(query=${listWord.word.wordText})}" th:text="${listWord.word.wordText}">Word</a>
+                </td>
+                <td>A short definition appears here...</td>
+                <td sec:authorize="isAuthenticated() and authentication.name == #vars.listOwnerUsername">
+                    <form th:action="@{/my-lists/{listId}/remove-word(listId=${list.id})}" method="post" style="margin:0;">
+                        <input type="hidden" name="wordId" th:value="${listWord.word.id}">
+                        <button type="submit" class="remove-btn" onclick="return confirm('Are you sure you want to remove this word?')">Remove</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div th:if="${#lists.isEmpty(list.listWords)}">
+        <p>This list is empty. Go search for words to add them here!</p>
+    </div>
 </div>
 
-<div th:if="${#lists.isEmpty(list.listWords)}">
-    <p>This list is empty. <a th:href="@{/}">Go search for words</a> to add them here!</p>
-</div>
+<script>
+    function toggleEditForm() {
+        event.preventDefault();
+        var displayDiv = document.getElementById('list-name-display');
+        var formDiv = document.getElementById('edit-name-form');
+        if (formDiv.style.display === 'none') {
+            displayDiv.style.display = 'none';
+            formDiv.style.display = 'block';
+        } else {
+            displayDiv.style.display = 'block';
+            formDiv.style.display = 'none';
+        }
+    }
+</script>
 </body>
 </html>

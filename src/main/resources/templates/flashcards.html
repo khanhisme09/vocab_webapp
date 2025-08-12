@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <!-- Sử dụng các biến mới được truyền từ controller -->
+    <title>Flashcards for <th:block th:text="${listName}"></th:block></title>
+    <style>
+        /* CSS giữ nguyên như trước */
+        body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; background-color: #f4f4f9; }
+        .flashcard-scene { width: 500px; height: 300px; perspective: 1000px; }
+        .flashcard { width: 100%; height: 100%; position: relative; transition: transform 0.8s; transform-style: preserve-3d; cursor: pointer; }
+        .flashcard.is-flipped { transform: rotateY(180deg); }
+        .flashcard-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; font-size: 2em; padding: 20px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 10px; background-color: white; }
+        .flashcard-face--back { transform: rotateY(180deg); font-size: 1.2em; }
+        .navigation { margin-top: 20px; }
+        .nav-button { font-size: 1.2em; padding: 10px 20px; margin: 0 10px; }
+        .progress { margin-top: 10px; color: #555; }
+    </style>
+</head>
+<body>
+<!-- Sử dụng listId mới -->
+<a th:href="@{/my-lists/{listId}(listId=${listId})}" style="position:absolute; top:20px; left:20px;">&larr; Back to List</a>
+
+<div class="flashcard-scene">
+    <div class="flashcard" id="flashcard">
+        <div class="flashcard-face flashcard-face--front" id="card-front">Word</div>
+        <div class="flashcard-face flashcard-face--back" id="card-back">Definition</div>
+    </div>
+</div>
+
+<p class="progress" id="progress-text">1 / X</p>
+
+<div class="navigation">
+    <button id="prev-btn" class="nav-button">Previous</button>
+    <button id="next-btn" class="nav-button">Next</button>
+</div>
+
+<script th:inline="javascript">
+    // ===== THAY ĐỔI LỚN Ở ĐÂY =====
+    // Giờ đây chúng ta nhận một mảng đối tượng DTO đơn giản, không còn vòng lặp
+    const flashcards = /*[[${flashcards}]]*/ [];
+
+    const words = flashcards.map(card => card.wordText);
+    const definitions = flashcards.map(card => card.definition);
+
+    let currentCardIndex = 0;
+    const flashcardEl = document.getElementById('flashcard');
+    const cardFront = document.getElementById('card-front');
+    const cardBack = document.getElementById('card-back');
+    const progressText = document.getElementById('progress-text');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    function showCard(index) {
+        if (flashcards.length === 0) {
+            cardFront.innerText = "This list has no words with definitions.";
+            cardBack.innerText = "Please add more words.";
+            progressText.innerText = '0 / 0';
+            return;
+        }
+
+        flashcardEl.classList.remove('is-flipped');
+
+        setTimeout(() => {
+            cardFront.innerText = words[index];
+            cardBack.innerText = definitions[index];
+            progressText.innerText = (index + 1) + ' / ' + flashcards.length;
+        }, 200);
+    }
+
+    flashcardEl.addEventListener('click', () => {
+        if (flashcards.length > 0) flashcardEl.classList.toggle('is-flipped');
+    });
+
+    prevBtn.addEventListener('click', () => {
+        currentCardIndex = (currentCardIndex - 1 + flashcards.length) % flashcards.length;
+        showCard(currentCardIndex);
+    });
+
+    nextBtn.addEventListener('click', () => {
+        currentCardIndex = (currentCardIndex + 1) % flashcards.length;
+        showCard(currentCardIndex);
+    });
+
+    showCard(currentCardIndex);
+</script>
+</body>
+</html>
