@@ -3,21 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <title>My Vocabulary Lists</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; }
+        h1 { color: #333; }
+        ul { list-style-type: none; padding: 0; }
+        li { background-color: #f9f9f9; border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+        a { color: #007bff; text-decoration: none; font-weight: bold; font-size: 1.2em; }
+        a:hover { text-decoration: underline; }
+        .word-count { color: #555; }
+        .home-link { display: inline-block; margin-bottom: 20px; }
+    </style>
 </head>
 <body>
 <h1>My Vocabulary Lists</h1>
-<a th:href="@{/}">Back to Home</a>
+<a th:href="@{/}" class="home-link">&larr; Back to Home</a>
+
 <ul>
+    <!--
+        THAY ĐỔI Ở ĐÂY:
+        - Biến lặp vẫn là 'list' trong 'lists'.
+        - Nhưng để đếm số từ, ta dùng #lists.size(list.listWords) thay vì list.words.
+    -->
     <li th:each="list : ${lists}">
-        <!-- URL được đổi sang /my-lists/{listId} -->
         <a th:href="@{/my-lists/{listId}(listId=${list.id})}" th:text="${list.name}">List Name</a>
-        <!-- Biến được đổi từ set.words sang list.words -->
-        (<span th:text="${#lists.size(list.words)}">0</span> words)
+        <span class="word-count" th:text="${#lists.size(list.listWords)} + ' words'">0 words</span>
     </li>
 </ul>
-<!-- Biến được đổi từ sets sang lists -->
+
 <div th:if="${#lists.isEmpty(lists)}">
-    <p>You haven't created any vocabulary lists yet.</p>
+    <p>You haven't created any vocabulary lists yet. <a th:href="@{/}">Go search for a word</a> to start a new list!</p>
 </div>
 </body>
 </html>

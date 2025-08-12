@@ -1,19 +1,61 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz in Progress</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; }
+        .question-block { border: 1px solid #e0e0e0; padding: 20px; margin-bottom: 25px; border-radius: 8px; }
+        .question-title { font-weight: bold; font-size: 1.1em; }
+        .question-text { font-style: italic; color: #333; margin-top: 5px; margin-bottom: 15px; }
+        .options-container div { margin-bottom: 8px; }
+        label { margin-left: 8px; }
+        input[type="text"] { font-size: 1em; padding: 8px; width: 250px; }
+        button { font-size: 1.2em; padding: 10px 20px; cursor: pointer; }
+    </style>
+</head>
 <body>
 <h1>Quiz in Progress</h1>
-<form th:action="@{/quiz/submit}" method="post">
-    <!-- Dùng th:each để lặp qua từng câu hỏi -->
-    <div th:each="question, iterStat : ${questions}" style="margin-bottom: 20px;">
-        <p th:text="${iterStat.count} + '. What is the word for: \'' + ${question.questionText} + '\''"></p>
-        <!-- Dùng th:each lặp qua các lựa chọn -->
-        <div th:each="option : ${question.options}">
-            <!-- Quan trọng: name phải có index để Spring có thể map thành Map<Integer, String> -->
-            <input type="radio" th:id="${iterStat.index} + '-' + ${option}" th:name="${'answers[' + iterStat.index + ']'}" th:value="${option}" required>
-            <label th:for="${iterStat.index} + '-' + ${option}" th:text="${option}"></label>
+<form th:action="@{/quiz/submit}" th:object="${quizAnswersForm}" method="post">
+    <div th:each="question, iterStat : ${questions}" class="question-block">
+        <div th:switch="${question.type}">
+
+            <!-- ===== CASE 1: CÂU HỎI TRẮC NGHIỆM ===== -->
+            <div th:case="${T(com.yourname.vocabularyapp.dto.QuizQuestionDto.QuestionType).MULTIPLE_CHOICE}">
+                <p class="question-title" th:text="${iterStat.count} + '. What is the word for:'"></p>
+                <p class="question-text" th:text="'\'' + ${question.questionText} + '\''"></p>
+
+                <div class="options-container">
+                    <div th:each="option : ${question.options}">
+                        <input type="radio"
+                               th:id="${iterStat.index} + '-' + ${#strings.replace(option, ' ', '_')}"
+                               th:field="*{answers[__${iterStat.index}__]}"
+                               th:value="${option}"
+                               required>
+                        <label th:for="${iterStat.index} + '-' + ${#strings.replace(option, ' ', '_')}"
+                               th:text="${option}"></label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== CASE 2: CÂU HỎI ĐIỀN VÀO CHỖ TRỐNG ===== -->
+            <div th:case="${T(com.yourname.vocabularyapp.dto.QuizQuestionDto.QuestionType).FILL_IN_THE_BLANK}">
+                <p class="question-title" th:text="${iterStat.count} + '. Fill in the blank:'"></p>
+                <p class="question-text" th:text="${question.questionText}"></p>
+
+                <label th:for="'answer-' + ${iterStat.index}">Your answer:</label>
+                <input type="text"
+                       th:id="'answer-' + ${iterStat.index}"
+                       th:field="*{answers[__${iterStat.index}__]}"
+                       required
+                       autocomplete="off"
+                       placeholder="Your answer...">
+            </div>
+
         </div>
     </div>
     <button type="submit">Submit Answers</button>
 </form>
+
 </body>
 </html>

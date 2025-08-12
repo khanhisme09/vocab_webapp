@@ -1,5 +1,6 @@
 package com.yourname.vocabularyapp.controller;
 
+import com.yourname.vocabularyapp.dto.QuizAnswersForm;
 import com.yourname.vocabularyapp.dto.QuizQuestionDto;
 import com.yourname.vocabularyapp.dto.QuizResultDto;
 import com.yourname.vocabularyapp.model.VocabularyList;
@@ -8,16 +9,19 @@ import com.yourname.vocabularyapp.service.VocabularyListService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.Principal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 @Controller
 public class QuizController {
+
+    private static final Logger logger = LoggerFactory.getLogger(QuizController.class);
 
     private final QuizService quizService;
     private final VocabularyListService listService;
@@ -49,25 +53,54 @@ public class QuizController {
     }
 
     // Trang làm bài quiz
+//    @GetMapping("/quiz/do")
+//    public String doQuiz(HttpSession session, Model model) {
+//        List<QuizQuestionDto> questions = (List<QuizQuestionDto>) session.getAttribute("quizQuestions");
+//        if (questions == null || questions.isEmpty()) {
+//            return "redirect:/quiz";
+//        }
+//        model.addAttribute("questions", questions);
+//        model.addAttribute("quizAnswersForm", new QuizAnswersForm());
+//
+//        return "quiz";
+//    }
     @GetMapping("/quiz/do")
     public String doQuiz(HttpSession session, Model model) {
-        List<QuizQuestionDto> questions = (List<QuizQuestionDto>) session.getAttribute("quizQuestions");
-        if (questions == null || questions.isEmpty()) {
-            return "redirect:/quiz"; // Nếu không có câu hỏi, quay lại trang chọn
+        Object obj = session.getAttribute("quizQuestions");
+        List<QuizQuestionDto> questions = Collections.emptyList();
+
+        if (obj instanceof List<?>) {
+            questions = ((List<?>) obj).stream()
+                    .filter(QuizQuestionDto.class::isInstance)
+                    .map(QuizQuestionDto.class::cast)
+                    .toList();
+        }
+
+        if (questions.isEmpty()) {
+            return "redirect:/quiz";
         }
         model.addAttribute("questions", questions);
+        model.addAttribute("quizAnswersForm", new QuizAnswersForm());
+
         return "quiz";
     }
 
-    // Xử lý việc nộp bài và chấm điểm
+
     @PostMapping("/quiz/submit")
-    public String submitQuiz(@RequestParam Map<Integer, String> answers, HttpSession session, Model model) {
+    // THAY ĐỔI Ở ĐÂY: Dùng @ModelAttribute thay vì @RequestParam
+    public String submitQuiz(@ModelAttribute QuizAnswersForm form, HttpSession session, Model model) {
+
+        // Lấy Map từ đối tượng form
+        Map<Integer, String> userAnswers = form.getAnswers();
+
+        logger.info("Received answers from form object: {}", userAnswers);
+
         List<QuizQuestionDto> questions = (List<QuizQuestionDto>) session.getAttribute("quizQuestions");
 
-        QuizResultDto result = quizService.checkAnswers(questions, answers);
+        QuizResultDto result = quizService.checkAnswers(questions, userAnswers);
         model.addAttribute("result", result);
 
-        session.removeAttribute("quizQuestions"); // Xóa câu hỏi khỏi session sau khi đã chấm
+        session.removeAttribute("quizQuestions");
         return "quiz-result";
     }
 }

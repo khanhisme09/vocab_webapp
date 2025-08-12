@@ -1,5 +1,6 @@
 package com.yourname.vocabularyapp.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,6 +13,9 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Value("${app.rememberme.key}")
+    private String appRememberMeKey;
 
     @Bean // Tạo một Bean PasswordEncoder để mã hóa mật khẩu
     public PasswordEncoder passwordEncoder() {
@@ -37,6 +41,11 @@ public class SecurityConfig {
                         .defaultSuccessUrl("/", true)
                         // Cho phép tất cả mọi người truy cập trang đăng nhập
                         .permitAll()
+                )
+                .rememberMe(remember -> remember
+                        .key(appRememberMeKey) // khóa bí mật, bạn có thể đặt bất kỳ
+                        .tokenValiditySeconds(7 * 24 * 60 * 60) // thời gian nhớ đăng nhập: 7 ngày
+                        .rememberMeParameter("remember-me") // tên param trong form
                 )
                 .logout(LogoutConfigurer::permitAll
                 );

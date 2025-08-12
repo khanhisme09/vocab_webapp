@@ -29,10 +29,16 @@
 <div th:if="${wordData}">
     <div class="word-header">
         <h1 th:text="${wordData.word}">Word</h1>
-        <span class="phonetic" th:text="${wordData.phonetics[0]?.text}">/fəˈnɛtɪk/</span>
-        <audio th:if="${wordData.phonetics[0]?.audio}" controls th:src="${wordData.phonetics[0].audio}">
-            Your browser does not support the audio element.
-        </audio>
+        <th:block th:each="phonetic : ${wordData.phonetics}">
+            <!-- Chỉ hiển thị khối này nếu có phiên âm dạng text -->
+            <div class.phonetic-block th:if="${phonetic.text}">
+                <span th:text="${phonetic.text}"></span>
+                <!-- Nút 1: Dùng link audio từ API nếu có -->
+                <button class="audio-btn" th:if="${phonetic.audio}" th:data-audio-url="${phonetic.audio}">🔊</button>
+                <!-- Nút 2: Dùng Web Speech API nếu không có link -->
+                <button class="audio-btn" th:unless="${phonetic.audio}" th:data-word="${wordData.word}">🔊</button>
+            </div>
+        </th:block>
     </div>
 
     <!-- ========== KHỐI THAY ĐỔI CHÍNH BẮT ĐẦU TỪ ĐÂY ========== -->
@@ -88,5 +94,30 @@
         </ul>
     </div>
 </div>
+<script>
+
+    document.addEventListener('click', (event) => {
+        if (!event.target.classList.contains('audio-btn')) return;
+
+        const audioUrl = event.target.dataset.audioUrl;
+        const word = event.target.dataset.word;
+        const audioPlayer = new Audio();
+
+        if (audioUrl) {
+            audioPlayer.src = audioUrl;
+            audioPlayer.play();
+        } else if (word) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = 'en-US';
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('Your browser does not support Text-to-Speech.');
+            }
+        }
+    });
+
+
+</script>
 </body>
 </html>
