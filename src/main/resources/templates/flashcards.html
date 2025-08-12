@@ -2,86 +2,138 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <!-- Sử dụng các biến mới được truyền từ controller -->
     <title>Flashcards for <th:block th:text="${listName}"></th:block></title>
-    <style>
-        /* CSS giữ nguyên như trước */
-        body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; background-color: #f4f4f9; }
-        .flashcard-scene { width: 500px; height: 300px; perspective: 1000px; }
-        .flashcard { width: 100%; height: 100%; position: relative; transition: transform 0.8s; transform-style: preserve-3d; cursor: pointer; }
-        .flashcard.is-flipped { transform: rotateY(180deg); }
-        .flashcard-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; font-size: 2em; padding: 20px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 10px; background-color: white; }
-        .flashcard-face--back { transform: rotateY(180deg); font-size: 1.2em; }
-        .navigation { margin-top: 20px; }
-        .nav-button { font-size: 1.2em; padding: 10px 20px; margin: 0 10px; }
-        .progress { margin-top: 10px; color: #555; }
-    </style>
+    <link rel="stylesheet" href="/css/flashcards.css">
 </head>
 <body>
-<!-- Sử dụng listId mới -->
-<a th:href="@{/my-lists/{listId}(listId=${listId})}" style="position:absolute; top:20px; left:20px;">&larr; Back to List</a>
+<a th:href="@{/my-lists/{listId}(listId=${listId})}" class="back-link">&larr; Back to List</a>
 
-<div class="flashcard-scene">
-    <div class="flashcard" id="flashcard">
-        <div class="flashcard-face flashcard-face--front" id="card-front">Word</div>
-        <div class="flashcard-face flashcard-face--back" id="card-back">Definition</div>
+<div class="container">
+    <div class="flashcard-scene">
+        <div class="flashcard" id="flashcard">
+            <!-- MẶT TRƯỚC: GIỜ CÓ CẢ TỪ, PHIÊN ÂM VÀ NÚT NGHE -->
+            <div class="flashcard-face flashcard-face--front">
+                <span class="word-text" id="card-front-text">Word</span>
+                <div class="phonetic-block">
+                    <span id="card-front-phonetic">/fəˈnɛtɪk/</span>
+                    <button class="audio-btn" id="audio-btn-front">🔊</button>
+                </div>
+            </div>
+            <!-- MẶT SAU: HIỂN THỊ ĐỊNH NGHĨA -->
+            <div class="flashcard-face flashcard-face--back" id="card-back-text">
+                Definition
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button id="prev-btn" class="nav-button">Previous</button>
+        <p class="progress" id="progress-text">1 / X</p>
+        <button id="next-btn" class="nav-button">Next</button>
     </div>
 </div>
 
-<p class="progress" id="progress-text">1 / X</p>
-
-<div class="navigation">
-    <button id="prev-btn" class="nav-button">Previous</button>
-    <button id="next-btn" class="nav-button">Next</button>
-</div>
-
 <script th:inline="javascript">
-    // ===== THAY ĐỔI LỚN Ở ĐÂY =====
-    // Giờ đây chúng ta nhận một mảng đối tượng DTO đơn giản, không còn vòng lặp
+    // Lấy dữ liệu DTO đã được làm phẳng từ controller
     const flashcards = /*[[${flashcards}]]*/ [];
 
-    const words = flashcards.map(card => card.wordText);
-    const definitions = flashcards.map(card => card.definition);
-
     let currentCardIndex = 0;
+
+    // Lấy các phần tử DOM
     const flashcardEl = document.getElementById('flashcard');
-    const cardFront = document.getElementById('card-front');
-    const cardBack = document.getElementById('card-back');
+    const cardFrontText = document.getElementById('card-front-text');
+    const cardFrontPhonetic = document.getElementById('card-front-phonetic'); // Mới
+    const audioBtnFront = document.getElementById('audio-btn-front');
+    const cardBackText = document.getElementById('card-back-text');
     const progressText = document.getElementById('progress-text');
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
+    const audioPlayer = new Audio();
 
     function showCard(index) {
         if (flashcards.length === 0) {
-            cardFront.innerText = "This list has no words with definitions.";
-            cardBack.innerText = "Please add more words.";
+            cardFrontText.innerText = "This list has no words.";
+            cardBackText.innerText = "Add more words to practice.";
+            cardFrontPhonetic.style.display = 'none'; // Ẩn khối phiên âm
             progressText.innerText = '0 / 0';
             return;
         }
 
-        flashcardEl.classList.remove('is-flipped');
+        if (flashcardEl.classList.contains('is-flipped')) {
+            flashcardEl.classList.remove('is-flipped');
+        }
 
         setTimeout(() => {
-            cardFront.innerText = words[index];
-            cardBack.innerText = definitions[index];
+            const currentCard = flashcards[index];
+
+            // Cập nhật nội dung
+            cardFrontText.innerText = currentCard.wordText;
+            cardBackText.innerText = currentCard.definition;
             progressText.innerText = (index + 1) + ' / ' + flashcards.length;
-        }, 200);
+
+            // Cập nhật phiên âm và nút audio
+            if (currentCard.phonetic) {
+                cardFrontPhonetic.innerText = currentCard.phonetic;
+                cardFrontPhonetic.style.display = 'flex'; // Hiển thị lại nếu bị ẩn
+            } else {
+                cardFrontPhonetic.style.display = 'none'; // Ẩn nếu từ không có phiên âm
+            }
+
+            // Cập nhật dữ liệu cho nút audio
+            audioBtnFront.dataset.word = currentCard.wordText;
+            if(currentCard.audioUrl) {
+                audioBtnFront.dataset.audioUrl = currentCard.audioUrl;
+            } else {
+                delete audioBtnFront.dataset.audioUrl;
+            }
+
+        }, 250);
     }
 
-    flashcardEl.addEventListener('click', () => {
-        if (flashcards.length > 0) flashcardEl.classList.toggle('is-flipped');
+    // Sự kiện lật thẻ: Ngăn lật khi click vào khối phiên âm
+    flashcardEl.addEventListener('click', (event) => {
+        if (!event.target.closest('.phonetic-block') && flashcards.length > 0) {
+            flashcardEl.classList.toggle('is-flipped');
+        }
     });
 
+    // Sự kiện cho nút audio: Giữ nguyên như cũ
+    audioBtnFront.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const btn = event.currentTarget;
+        const audioUrl = btn.dataset.audioUrl;
+        const word = btn.dataset.word;
+
+        if (audioUrl) {
+            audioPlayer.src = audioUrl;
+            audioPlayer.play();
+        } else if (word) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = 'en-US';
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('Your browser does not support Text-to-Speech.');
+            }
+        }
+    });
+
+    // Sự kiện cho các nút điều hướng
     prevBtn.addEventListener('click', () => {
-        currentCardIndex = (currentCardIndex - 1 + flashcards.length) % flashcards.length;
-        showCard(currentCardIndex);
+        if (flashcards.length > 0) {
+            currentCardIndex = (currentCardIndex - 1 + flashcards.length) % flashcards.length;
+            showCard(currentCardIndex);
+        }
     });
 
     nextBtn.addEventListener('click', () => {
-        currentCardIndex = (currentCardIndex + 1) % flashcards.length;
-        showCard(currentCardIndex);
+        if (flashcards.length > 0) {
+            currentCardIndex = (currentCardIndex + 1) % flashcards.length;
+            showCard(currentCardIndex);
+        }
     });
 
+    // Hiển thị thẻ đầu tiên
     showCard(currentCardIndex);
 </script>
 </body>

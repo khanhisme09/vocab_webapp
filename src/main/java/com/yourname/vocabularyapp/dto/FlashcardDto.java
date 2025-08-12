@@ -10,4 +10,7 @@ import lombok.NoArgsConstructor;
 public class FlashcardDto {
     private String wordText;
     private String definition;
+    // THÊM 2 TRƯỜNG MỚI
+    private String phonetic;
+    private String audioUrl;
 }
