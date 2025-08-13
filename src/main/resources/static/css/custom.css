@@ -200,3 +200,41 @@ MY LISTS PAGE STYLES
 .actions-dropdown .dropdown-toggle::after {
     display: none; /* Ẩn mũi tên mặc định của dropdown */
 }
+
+/*
+====================================================================
+LIST DETAILS PAGE STYLES
+====================================================================
+*/
+
+/* Làm cho header của trang nổi bật hơn */
+.list-details-header {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.list-details-header .btn-link {
+    text-decoration: none;
+}
+
+/* Tùy chỉnh bảng từ vựng */
+.word-table .word-info a {
+    font-weight: 600; /* Semi-bold */
+    font-size: 1.1em;
+    color: var(--text-color);
+}
+
+.word-table .phonetic {
+    font-size: 0.9em;
+    color: var(--text-muted);
+}
+
+.word-table .example-text {
+    font-style: italic;
+    color: var(--text-muted);
+    font-size: 0.9em;
+    margin-top: 0.5rem;
+    padding-left: 1rem;
+    border-left: 2px solid #e9ecef;
+}

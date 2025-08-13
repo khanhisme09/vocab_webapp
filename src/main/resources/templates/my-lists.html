@@ -60,9 +60,19 @@
                         </ul>
                     </div>
 
-                    <a th:href="@{/lists/{listId}/flashcards(listId=${list.id})}" class="btn btn-primary mt-auto">
-                        <i class="bi bi-layers-fill me-2"></i> Practice with Flashcards
-                    </a>
+                    <div class="d-flex gap-2">
+                        <a th:href="@{/lists/{listId}/flashcards(listId=${list.id})}" class="btn btn-primary flex-fill">
+                            <i class="bi bi-layers-fill me-2"></i> Practice with Flashcards
+                        </a>
+
+                        <form th:action="@{/quiz/start}" method="post" class="flex-fill m-0">
+                            <input type="hidden" name="listId" th:value="${list.id}">
+                            <button type="submit" class="btn btn-primary w-100">
+                                Take a Quiz
+                            </button>
+                        </form>
+                    </div>
+
                 </div>
             </div>
         </div>
