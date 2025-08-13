@@ -15,7 +15,6 @@ function toggleEditForm(event) {
     formDiv.classList.toggle('d-none');
 }
 
-// Hàm xử lý việc xóa từ bằng AJAX
 function initializeRemoveWordButtons() {
     document.querySelectorAll('.remove-word-btn').forEach(button => {
         button.addEventListener('click', (event) => {
@@ -26,30 +25,58 @@ function initializeRemoveWordButtons() {
             const btn = event.currentTarget;
             const listId = btn.dataset.listId;
             const wordId = btn.dataset.wordId;
-            const token = btn.dataset.csrfToken;
-            const header = btn.dataset.csrfHeader;
+            const csrfToken = btn.dataset.csrfToken;
+            const csrfHeader = btn.dataset.csrfHeader;
 
-            fetch(`/my-lists/${listId}/remove-word/${wordId}`, {
-                method: 'DELETE',
+            // Tạo một đối tượng FormData để gửi dữ liệu
+            const formData = new FormData();
+            formData.append('wordId', wordId);
+            // Spring Security sẽ tự tìm CSRF token trong request body hoặc header
+            // Để chắc chắn, chúng ta có thể gửi nó trong cả hai
+            formData.append('_csrf', csrfToken);
+
+            // Gửi request POST đến endpoint mới
+            fetch(`/my-lists/${listId}/remove-word`, {
+                method: 'POST',
                 headers: {
-                    [header]: token
-                }
+                    // Gửi CSRF token trong header
+                    [csrfHeader]: csrfToken
+                },
+                // Gửi wordId và token trong body
+                body: new URLSearchParams(formData)
             })
                 .then(response => {
+                    // Kiểm tra xem request có thành công không (status 200-299)
                     if (response.ok) {
-                        const row = btn.closest('tr');
-                        row.style.transition = 'opacity 0.5s ease';
-                        row.style.opacity = '0';
-                        setTimeout(() => row.remove(), 500);
-                        // Cần cập nhật lại số lượng từ trên trang
-                        // (Đây là một cải tiến nâng cao có thể làm sau)
+                        return response.json(); // Nếu thành công, đọc body JSON
                     } else {
-                        alert('Failed to remove word. Please try again.');
+                        // Nếu thất bại, ném ra một lỗi để catch xử lý
+                        return response.json().then(errorData => {
+                            throw new Error(errorData.error || 'Failed to remove word.');
+                        });
+                    }
+                })
+                .then(data => {
+                    // Chỉ xóa hàng khỏi giao diện KHI VÀ CHỈ KHI backend xác nhận thành công
+                    console.log(data.message); // In ra thông báo thành công
+                    const row = btn.closest('tr');
+                    row.style.transition = 'opacity 0.5s ease';
+                    row.style.opacity = '0';
+                    setTimeout(() => row.remove(), 500);
+
+                    // Hiển thị toast thông báo thành công
+                    if (typeof showToast === 'function') {
+                        showToast('Word removed successfully!', 'success');
                     }
                 })
                 .catch(error => {
+                    // Bắt lỗi và hiển thị cho người dùng
                     console.error('Error:', error);
-                    alert('An error occurred while removing the word.');
+                    if (typeof showToast === 'function') {
+                        showToast(error.message, 'danger');
+                    } else {
+                        alert(error.message);
+                    }
                 });
         });
     });

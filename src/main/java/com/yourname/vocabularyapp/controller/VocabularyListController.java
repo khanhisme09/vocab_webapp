@@ -3,12 +3,10 @@ package com.yourname.vocabularyapp.controller;
 import com.yourname.vocabularyapp.model.VocabularyList;
 import com.yourname.vocabularyapp.repository.VocabularyListRepository;
 import com.yourname.vocabularyapp.service.VocabularyListService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
@@ -85,9 +83,18 @@ public class VocabularyListController {
     }
 
     @PostMapping("/my-lists/{listId}/remove-word")
-    public String removeWordFromList(@PathVariable Long listId, @RequestParam Long wordId, Principal principal) {
-        listService.removeWordFromList(listId, wordId, principal.getName());
-        return "redirect:/my-lists/" + listId; // Tải lại trang chi tiết list
+    @ResponseBody
+    public ResponseEntity<?> removeWordFromList(@PathVariable Long listId,
+                                                @RequestParam Long wordId, // Nhận wordId từ body của request
+                                                Principal principal) {
+        try {
+            listService.removeWordFromList(listId, wordId, principal.getName());
+            // Trả về một JSON xác nhận thành công
+            return ResponseEntity.ok(Map.of("message", "Word removed successfully."));
+        } catch (Exception e) {
+            // Trả về lỗi 400 (Bad Request) nếu có vấn đề
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     //edit list name

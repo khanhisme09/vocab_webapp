@@ -51,11 +51,27 @@
         <!-- ===== FORM THÊM TỪ MỚI ===== -->
         <div class="card mb-4" sec:authorize="isAuthenticated() and authentication.name == #vars.listOwnerUsername">
             <div class="card-body">
-                <form th:action="@{/my-lists/add-word}" method="post" class="d-flex gap-2">
-                    <input type="hidden" name="listId" th:value="${list.id}">
-                    <input type="text" name="word" class="form-control" placeholder="Add a new word to this list..." required>
-                    <button type="submit" class="btn btn-success">Add</button>
+<!--                <form th:action="@{/my-lists/add-word}" method="post" class="d-flex gap-2">-->
+<!--                    <input type="hidden" name="listId" th:value="${list.id}">-->
+<!--                    <input type="text" name="word" class="form-control" placeholder="Add a new word to this list..." required>-->
+<!--                    <button type="submit" class="btn btn-success">Add</button>-->
+<!--                </form>-->
+
+                <form th:action="@{/search}" method="get" class="d-flex gap-2">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" name="query" class="form-control" placeholder="Add a new word to this list..." required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Find</button>
                 </form>
+
+
+                <!--<form id="redirect-to-search-form" th:action="@{/search}" method="get" class="d-flex gap-2">
+                    <input type="text" id="search-query-input" name="query" class="form-control" placeholder="Find a word to add..." required>
+                    <i class="bi bi-search"></i>
+                    <button type="submit" class="btn btn-primary">Find</button>
+                </form>
+-->
             </div>
         </div>
 
