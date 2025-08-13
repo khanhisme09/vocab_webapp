@@ -1,140 +1,76 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Flashcards for <th:block th:text="${listName}"></th:block></title>
-    <link rel="stylesheet" href="/css/flashcards.css">
+<head th:replace="~{fragments/_header :: page_head('Flash Card')}">
+<!--    <link rel="stylesheet" href="/css/flashcards.css">-->
 </head>
 <body>
-<a th:href="@{/my-lists/{listId}(listId=${listId})}" class="back-link">&larr; Back to List</a>
+<div th:replace="~{fragments/_header :: navbar}"></div>
+<!--    <main class="container w-75 mx-auto">-->
+<!--        <div class="navigation">-->
+<!--            <a th:href="@{/my-lists/{listId}(listId=${listId})}" class="back-link">&larr; Back to List</a>-->
+<!--            <button id="prev-btn" class="nav-button">Previous</button>-->
+<!--            <p class="progress" id="progress-text">1 / X</p>-->
+<!--            <button id="next-btn" class="nav-button">Next</button>-->
+<!--        </div>-->
 
-<div class="container">
-    <div class="flashcard-scene">
-        <div class="flashcard" id="flashcard">
-            <!-- MẶT TRƯỚC: GIỜ CÓ CẢ TỪ, PHIÊN ÂM VÀ NÚT NGHE -->
-            <div class="flashcard-face flashcard-face--front">
-                <span class="word-text" id="card-front-text">Word</span>
-                <div class="phonetic-block">
+<!--        <div class="flashcard-scene">-->
+<!--            <div class="flashcard" id="flashcard">-->
+<!--                &lt;!&ndash; MẶT TRƯỚC: GIỜ CÓ CẢ TỪ, PHIÊN ÂM VÀ NÚT NGHE &ndash;&gt;-->
+<!--                <div class="flashcard-face flashcard-face&#45;&#45;front">-->
+<!--                    <span class="word-text" id="card-front-text">Word</span>-->
+<!--                    <div class="phonetic-block">-->
+<!--                        <span id="card-front-phonetic">/fəˈnɛtɪk/</span>-->
+<!--                        <button class="audio-btn" id="audio-btn-front">🔊</button>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                &lt;!&ndash; MẶT SAU: HIỂN THỊ ĐỊNH NGHĨA &ndash;&gt;-->
+<!--                <div class="flashcard-face flashcard-face&#45;&#45;back" id="card-back-text">-->
+<!--                    Definition-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </main>-->
+
+<main class="container w-100 w-lg-75 mx-auto py-5">
+
+    <div class="d-flex justify-content-start gap-5 align-items-center mb-4">
+        <a th:href="@{/my-lists/{listId}(listId=${listId})}"
+           class="btn btn-outline-primary">
+            &larr; Back to List
+        </a>
+        <button id="prev-btn" class="btn btn-secondary">Previous</button>
+        <p class="mb-0 fw-bold" id="progress-text">1 / X</p>
+        <button id="next-btn" class="btn btn-primary">Next</button>
+    </div>
+
+
+    <!-- Flashcard Scene -->
+    <div class="flashcard-scene mb-4">
+        <div class="flashcard " id="flashcard">
+            <!-- Front -->
+            <div class="flashcard-face flashcard-face--front p-2 border rounded-5 shadow-sm text-center">
+                <span class="word-text h3 d-block mb-2" id="card-front-text">Word</span>
+                <div class="phonetic-block d-flex justify-content-center align-items-center gap-2">
                     <span id="card-front-phonetic">/fəˈnɛtɪk/</span>
-                    <button class="audio-btn" id="audio-btn-front">🔊</button>
+                    <button class="btn btn-outline-secondary btn-sm" id="audio-btn-front">🔊</button>
                 </div>
             </div>
-            <!-- MẶT SAU: HIỂN THỊ ĐỊNH NGHĨA -->
-            <div class="flashcard-face flashcard-face--back" id="card-back-text">
+            <!-- Back -->
+            <div class="flashcard-face flashcard-face--back p-2 border rounded-5 shadow-sm text-center mt-3" id="card-back-text">
                 Definition
             </div>
         </div>
     </div>
+</main>
 
-    <div class="navigation">
-        <button id="prev-btn" class="nav-button">Previous</button>
-        <p class="progress" id="progress-text">1 / X</p>
-        <button id="next-btn" class="nav-button">Next</button>
-    </div>
-</div>
+<div th:replace="~{fragments/_footer :: page_footer}"></div>
 
 <script th:inline="javascript">
-    // Lấy dữ liệu DTO đã được làm phẳng từ controller
-    const flashcards = /*[[${flashcards}]]*/ [];
-
-    let currentCardIndex = 0;
-
-    // Lấy các phần tử DOM
-    const flashcardEl = document.getElementById('flashcard');
-    const cardFrontText = document.getElementById('card-front-text');
-    const cardFrontPhonetic = document.getElementById('card-front-phonetic'); // Mới
-    const audioBtnFront = document.getElementById('audio-btn-front');
-    const cardBackText = document.getElementById('card-back-text');
-    const progressText = document.getElementById('progress-text');
-    const prevBtn = document.getElementById('prev-btn');
-    const nextBtn = document.getElementById('next-btn');
-    const audioPlayer = new Audio();
-
-    function showCard(index) {
-        if (flashcards.length === 0) {
-            cardFrontText.innerText = "This list has no words.";
-            cardBackText.innerText = "Add more words to practice.";
-            cardFrontPhonetic.style.display = 'none'; // Ẩn khối phiên âm
-            progressText.innerText = '0 / 0';
-            return;
-        }
-
-        if (flashcardEl.classList.contains('is-flipped')) {
-            flashcardEl.classList.remove('is-flipped');
-        }
-
-        setTimeout(() => {
-            const currentCard = flashcards[index];
-
-            // Cập nhật nội dung
-            cardFrontText.innerText = currentCard.wordText;
-            cardBackText.innerText = currentCard.definition;
-            progressText.innerText = (index + 1) + ' / ' + flashcards.length;
-
-            // Cập nhật phiên âm và nút audio
-            if (currentCard.phonetic) {
-                cardFrontPhonetic.innerText = currentCard.phonetic;
-                cardFrontPhonetic.style.display = 'flex'; // Hiển thị lại nếu bị ẩn
-            } else {
-                cardFrontPhonetic.style.display = 'none'; // Ẩn nếu từ không có phiên âm
-            }
-
-            // Cập nhật dữ liệu cho nút audio
-            audioBtnFront.dataset.word = currentCard.wordText;
-            if(currentCard.audioUrl) {
-                audioBtnFront.dataset.audioUrl = currentCard.audioUrl;
-            } else {
-                delete audioBtnFront.dataset.audioUrl;
-            }
-
-        }, 250);
-    }
-
-    // Sự kiện lật thẻ: Ngăn lật khi click vào khối phiên âm
-    flashcardEl.addEventListener('click', (event) => {
-        if (!event.target.closest('.phonetic-block') && flashcards.length > 0) {
-            flashcardEl.classList.toggle('is-flipped');
-        }
-    });
-
-    // Sự kiện cho nút audio: Giữ nguyên như cũ
-    audioBtnFront.addEventListener('click', (event) => {
-        event.stopPropagation();
-        const btn = event.currentTarget;
-        const audioUrl = btn.dataset.audioUrl;
-        const word = btn.dataset.word;
-
-        if (audioUrl) {
-            audioPlayer.src = audioUrl;
-            audioPlayer.play();
-        } else if (word) {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(word);
-                utterance.lang = 'en-US';
-                window.speechSynthesis.speak(utterance);
-            } else {
-                alert('Your browser does not support Text-to-Speech.');
-            }
-        }
-    });
-
-    // Sự kiện cho các nút điều hướng
-    prevBtn.addEventListener('click', () => {
-        if (flashcards.length > 0) {
-            currentCardIndex = (currentCardIndex - 1 + flashcards.length) % flashcards.length;
-            showCard(currentCardIndex);
-        }
-    });
-
-    nextBtn.addEventListener('click', () => {
-        if (flashcards.length > 0) {
-            currentCardIndex = (currentCardIndex + 1) % flashcards.length;
-            showCard(currentCardIndex);
-        }
-    });
-
-    // Hiển thị thẻ đầu tiên
-    showCard(currentCardIndex);
+    /*<![CDATA[*/
+    window.flashcards = /*[[${flashcards}]]*/ [];
+    /*]]>*/
 </script>
+
+<script src="/js/flashcard.js"></script>
 </body>
 </html>

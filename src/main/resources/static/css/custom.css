@@ -257,6 +257,8 @@ body.flashcard-page {
     overflow: hidden; /* Tránh scrollbar không cần thiết */
 }
 
+
+
 .flashcard-container {
     display: flex;
     flex-direction: column;
@@ -268,7 +270,7 @@ body.flashcard-page {
 
 .flashcard-scene {
     width: 100%;
-    padding-top: 60%; /* Tỷ lệ thẻ 5:3 (600px * 60% = 360px) */
+    padding-top: 30%; /* Tỷ lệ thẻ 5:3 (600px * 60% = 360px) */
     position: relative;
     perspective: 1500px;
     margin-bottom: 1.5rem;
@@ -404,3 +406,6 @@ body.quiz-page {
 .options-container.answered .quiz-option.correct {
     opacity: 1; /* Làm nổi bật đáp án đúng */
 }
+
+
+

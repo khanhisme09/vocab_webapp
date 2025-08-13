@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class QuizService {
@@ -23,74 +22,60 @@ public class QuizService {
 
     private final VocabularyListRepository listRepository;
     private final DictionaryService dictionaryService;
-    private final ReviewService reviewService; // Inject ReviewService
 
-    public QuizService(VocabularyListRepository listRepository, DictionaryService dictionaryService, ReviewService reviewService) {
+    public QuizService(VocabularyListRepository listRepository, DictionaryService dictionaryService) {
         this.listRepository = listRepository;
         this.dictionaryService = dictionaryService;
-        this.reviewService = reviewService;
     }
 
-    public List<QuizQuestionDto> createQuizForList(Long listId, int maxQuestions) {
+    public List<QuizQuestionDto> createQuizForList(Long listId, int numberOfQuestions) {
         VocabularyList list = listRepository.findWithWordsById(listId)
                 .orElseThrow(() -> new RuntimeException("List not found"));
 
-        List<Word> allWordsInList = list.getListWords().stream()
-                .map(ListWord::getWord)
-                .collect(Collectors.toList());
+        // THAY ĐỔI LỚN: Lấy danh sách từ ListWord thay vì Word trực tiếp
+        List<ListWord> allListWords = new ArrayList<>(list.getListWords());
 
-        // Điều kiện tối thiểu để tạo quiz vẫn cần thiết
-        if (allWordsInList.size() < 4) {
-            throw new IllegalArgumentException("List must have at least 4 words to create a quiz.");
+        if (allListWords.size() < 4) {
+            // Điều kiện này vẫn giữ nguyên, nhưng có thể nới lỏng cho câu hỏi điền vào chỗ trống
+            throw new IllegalArgumentException("List must have at least 4 words to create a multiple-choice quiz.");
         }
 
-        // Xáo trộn danh sách từ để câu hỏi luôn mới mẻ
-        Collections.shuffle(allWordsInList);
+        Collections.shuffle(allListWords);
 
         List<QuizQuestionDto> quizQuestions = new ArrayList<>();
+        int questionsToCreate = Math.min(numberOfQuestions, allListWords.size());
 
-        // Lặp qua TOÀN BỘ danh sách từ đã xáo trộn
-        for (Word correctWord : allWordsInList) {
-            // Dừng lại khi đã tạo đủ số câu hỏi mong muốn
-            if (quizQuestions.size() >= maxQuestions) {
-                break;
-            }
+        for (int i = 0; i < questionsToCreate; i++) {
+            ListWord correctListWord = allListWords.get(i);
+            Word correctWord = correctListWord.getWord();
 
-            QuizQuestionDto newQuestion = null;
-
-            // Quyết định ngẫu nhiên loại câu hỏi
             if (Math.random() > 0.5) {
-                // Thử tạo câu hỏi trắc nghiệm
+                // Tạo câu hỏi trắc nghiệm
                 String definition = dictionaryService.getFirstDefinition(correctWord.getWordText());
-                if (definition != null) {
-                    List<String> options = new ArrayList<>();
-                    options.add(correctWord.getWordText());
+                if (definition == null) continue;
 
-                    List<Word> tempWords = new ArrayList<>(allWordsInList);
-                    tempWords.remove(correctWord);
-                    Collections.shuffle(tempWords);
+                List<String> options = new ArrayList<>();
+                options.add(correctWord.getWordText());
 
-                    for (int j = 0; j < 3; j++) {
-                        options.add(tempWords.get(j).getWordText());
-                    }
-                    Collections.shuffle(options);
-                    newQuestion = new QuizQuestionDto(correctWord.getListWords().iterator().next().getId(), QuizQuestionDto.QuestionType.MULTIPLE_CHOICE, definition, options, correctWord.getWordText());
+                List<ListWord> tempWords = new ArrayList<>(allListWords);
+                tempWords.remove(correctListWord);
+                Collections.shuffle(tempWords);
+                for (int j = 0; j < 3; j++) {
+                    options.add(tempWords.get(j).getWord().getWordText());
                 }
+                Collections.shuffle(options);
+                // Truyền ID của ListWord vào DTO
+                quizQuestions.add(new QuizQuestionDto(correctListWord.getId(), QuizQuestionDto.QuestionType.MULTIPLE_CHOICE, definition, options, correctWord.getWordText()));
+
             } else {
-                // Thử tạo câu hỏi điền vào chỗ trống
+                // Tạo câu hỏi điền vào chỗ trống
                 String example = dictionaryService.getFirstExample(correctWord.getWordText());
-                if (example != null) {
-                    String questionSentence = example.replaceAll("(?i)" + correctWord.getWordText(), "_______");
-                    newQuestion = new QuizQuestionDto(correctWord.getListWords().iterator().next().getId(), QuizQuestionDto.QuestionType.FILL_IN_THE_BLANK, questionSentence, null, correctWord.getWordText());
-                }
-            }
+                if (example == null) continue;
 
-            // Nếu tạo câu hỏi thành công (không bị null), thêm vào danh sách
-            if (newQuestion != null) {
-                quizQuestions.add(newQuestion);
+                String questionSentence = example.replaceAll("(?i)" + correctWord.getWordText(), "_______");
+                quizQuestions.add(new QuizQuestionDto(correctListWord.getId(), QuizQuestionDto.QuestionType.FILL_IN_THE_BLANK, questionSentence, null, correctWord.getWordText()));
             }
         }
-
         return quizQuestions;
     }
 
@@ -120,9 +105,7 @@ public class QuizService {
             logger.info("Q{}: Correct='{}', User='{}', Match={}", i + 1, correctAnswer, userAnswer, isCorrect);
 
             // Cập nhật trạng thái SRS (đã có từ trước)
-            if (question.getListWordId() != null) {
-                reviewService.processAnswer(question.getListWordId(), isCorrect);
-            }
+
         }
         logger.info("Final score: {}/{}", score, questions.size());
         return new QuizResultDto(score, questions.size());

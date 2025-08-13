@@ -8,9 +8,9 @@
 
 <main class="container">
     <div th:with="listOwnerUsername=${list.user.username}">
-        <a th:href="@{/my-lists}" class="btn btn-outline-secondary mb-3">
-            <i class="bi bi-arrow-left"></i> Back to All Lists
-        </a>
+<!--        <a th:href="@{/my-lists}" class="btn btn-outline-secondary mb-3">-->
+<!--            <i class="bi bi-arrow-left"></i> Back to All Lists-->
+<!--        </a>-->
 
         <!-- ===== HEADER CỦA TRANG (ĐÃ SỬA LẠI) ===== -->
         <div class="list-details-header">
@@ -64,14 +64,6 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Find</button>
                 </form>
-
-
-                <!--<form id="redirect-to-search-form" th:action="@{/search}" method="get" class="d-flex gap-2">
-                    <input type="text" id="search-query-input" name="query" class="form-control" placeholder="Find a word to add..." required>
-                    <i class="bi bi-search"></i>
-                    <button type="submit" class="btn btn-primary">Find</button>
-                </form>
--->
             </div>
         </div>
 
