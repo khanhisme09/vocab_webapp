@@ -1,0 +1,93 @@
+:root {
+    --bs-primary-rgb: 8, 102, 255; /* Đổi màu primary của Bootstrap thành màu xanh dương đẹp hơn */
+    --primary-color: rgb(var(--bs-primary-rgb));
+    --light-blue-bg: #f5faff;
+    --text-color: #21252;
+    --white-bg: #ffffff;
+}
+
+body {
+    /* Áp dụng font Nunito cho toàn bộ trang */
+    font-family: 'Nunito', sans-serif;
+    background-color: var(--light-blue-bg);
+    color: var(--block-font-family);
+}
+/* Hero Section - Khối chính trên trang chủ */
+.hero-section {
+    background-color: #ffffff;
+    border-radius: 1.5rem;
+    padding: 4rem 2rem;
+    margin-top: 2rem;
+    margin-bottom: 3rem;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,.05);
+}
+
+.hero-section .form-control-lg {
+    padding: 1rem 1.5rem;
+}
+
+/* Feature Section - Khối giới thiệu tính năng */
+.feature-icon {
+    width: 4rem;
+    height: 4rem;
+    border-radius: .75rem;
+}
+
+.icon-link {
+    display: inline-flex;
+    align-items: center; /* căn giữa theo chiều dọc */
+    gap: 4px; /* khoảng cách giữa chữ và icon */
+    text-decoration: none; /* bỏ gạch chân nếu muốn */
+}
+.user-dropdown-toggle {
+    display: flex; /* Dùng flexbox để căn chỉnh icon và text */
+    align-items: center;
+    gap: 0.5rem; /* Tạo một chút khoảng cách giữa tên và icon mới */
+}
+.dropdown-toggle::after {
+    display: none !important;
+}
+h1, h2, h3, h4, h5, h6, .fw-bold, b {
+    font-weight: 700; /* Bold */
+}
+
+/* === NAVBAR CUSTOMIZATION === */
+.navbar {
+    /* ... */
+}
+
+.nav-pills .nav-link {
+    /* 1. Đặt màu chữ mặc định là màu đen */
+    color: var(--text-color); /* Sử dụng biến màu chữ chính đã định nghĩa */
+    font-size: 1rem;      /* Trả lại kích thước font bình thường */
+    font-weight: 600;     /* Semi-bold */
+
+    /* Hiệu ứng chuyển màu mượt mà */
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+/* 2. Định nghĩa lại màu khi hover và khi active (trang hiện tại) */
+.nav-pills .nav-link:hover {
+    color: var(--primary-color); /* Khi di chuột vào, chữ chuyển sang màu xanh */
+    background-color: var(--light-blue-bg); /* Nền chuyển sang màu xanh nhạt */
+}
+
+/*
+   Bootstrap sẽ tự động thêm class 'active' vào link của trang hiện tại.
+   Chúng ta sẽ làm cho nó nổi bật hơn.
+*/
+.nav-pills .nav-link.active {
+    color: var(--white-bg); /* Chữ màu trắng */
+    background-color: var(--primary-color); /* Nền màu xanh chính */
+}
+
+/* Tùy chỉnh kích thước icon */
+.nav-pills .nav-link i {
+    font-size: 1.1rem;
+    /* Không cần thay đổi nhiều ở đây nữa */
+}
+
+/* Làm cho nút Sign Up nổi bật hơn một chút */
+.navbar .btn.btn-primary {
+    padding: 0.4rem 1rem;
+}

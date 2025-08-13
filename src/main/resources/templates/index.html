@@ -1,44 +1,80 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" >
-<head>
-    <meta charset="UTF-8">
-    <title>Vocabulary Search</title>
-    <style>
-        /* Thêm một chút CSS đơn giản cho đẹp hơn */
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 80vh; flex-direction: column; }
-        form { display: flex; }
-        input[type="text"] { font-size: 1.2em; padding: 10px; width: 300px; }
-        button { font-size: 1.2em; padding: 10px; }
-    </style>
-</head>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<!-- 1. Gọi fragment HEAD từ _header.html và truyền title vào -->
+<head th:replace="~{fragments/_header :: page_head('The Smartest Way to Learn Vocabulary')}"></head>
+
 <body>
-<div style="position: absolute; top: 10px; right: 10px;">
-    <!-- Khối này hiển thị khi người dùng chưa đăng nhập -->
-    <div sec:authorize="!isAuthenticated()">
-        <a th:href="@{/login}">Login</a> | <a th:href="@{/register}">Register</a>
+<!-- 2. Gọi fragment NAVBAR từ _header.html -->
+<div th:replace="~{fragments/_header :: navbar}"></div>
+
+<!-- 3. Đặt nội dung chính của trang vào đây -->
+<main>
+    <div class="container">
+        <div class="hero-section text-center">
+            <!-- HERO SECTION: Khối chính với thanh tìm kiếm -->
+            <div class="container">
+                <div class="hero-section text-center">
+                    <h1 class="display-4 fw-bold">The smartest, fastest way to learn a word</h1>
+                    <p class="col-lg-8 mx-auto lead text-muted">
+                        Look up a word, learn it, and never forget it. Our adaptive learning system helps you master words through fun and engaging activities.
+                    </p>
+                    <div class="col-lg-8 mx-auto mt-4">
+                        <form th:action="@{/search}" method="get" class="d-flex">
+                            <input type="text" name="query" class="form-control form-control-lg" placeholder="Look up a word..." required>
+                            <button type="submit" class="btn btn-primary btn-lg ms-2">Search</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <!-- Khối này hiển thị khi người dùng đã đăng nhập -->
-    <div sec:authorize="isAuthenticated()">
-        <span>Welcome, <b sec:authentication="name">Username</b>!</span> |
-
-        <a th:href="@{/my-lists}">My Lists</a>
-        <a th:href="@{/quiz}">Practice Quiz</a>|
-        <a th:href="@{/dashboard}">Dashboard</a>.
-
-        <form th:action="@{/logout}" method="post" style="display: inline;">
-            <button type="submit">Logout</button>
-        </form>
+    <div class="container px-4 py-5">
+        <!-- FEATURES SECTION: Khối giới thiệu các tính năng -->
+        <div class="container px-4 py-5" id="featured-3">
+<!--            <h2 class="pb-2 border-bottom text-center">How It Works</h2>-->
+            <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+                <!-- Tính năng 1: Learn -->
+                <div class="feature col">
+                    <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
+                        <i class="bi bi-book"></i>
+                    </div>
+                    <h3 class="fs-2 text-body-emphasis">Learn</h3>
+                    <p>Discover new words with our comprehensive dictionary. Save words to your personal lists and access them anytime, anywhere.</p>
+                    <a th:href="@{/my-lists}" class="icon-link">
+                        Go to My Lists <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <!-- Tính năng 2: Practice -->
+                <div class="feature col">
+                    <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
+                        <i class="bi bi-check2-square"></i>
+                    </div>
+                    <h3 class="fs-2 text-body-emphasis">Practice</h3>
+                    <p>Reinforce your knowledge with interactive quizzes and flashcards. Our Spaced Repetition System ensures you remember what you've learned.</p>
+                    <a th:href="@{/quiz}" class="icon-link">
+                        Take a Quiz <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <!-- Tính năng 3: Master -->
+                <div class="feature col">
+                    <div class="feature-icon d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-2 mb-3">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <h3 class="fs-2 text-body-emphasis">Master</h3>
+                    <p>Track your progress with detailed statistics. See how many words you've mastered and watch your vocabulary grow over time.</p>
+                    <a th:href="@{/dashboard}" class="icon-link">
+                        View Dashboard <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
-<h1>Vocabulary Search</h1>
-<!-- Form này sẽ gửi yêu cầu GET đến /search -->
-<form th:action="@{/search}" method="get">
-    <label>
-        <input type="text" name="query" placeholder="Enter a word..." required>
-    </label>
-    <button type="submit">Search</button>
-</form>
+</main>
+
+<!-- 4. Gọi fragment FOOTER từ _footer.html -->
+<div th:replace="~{fragments/_footer :: page_footer}"></div>
+
+
 </body>
 </html>
