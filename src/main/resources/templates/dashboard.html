@@ -1,76 +1,128 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>My Dashboard</title>
-    <!-- Tích hợp Chart.js từ CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        .dashboard-container { max-width: 900px; margin: 40px auto; }
-        .stats-summary { display: flex; justify-content: space-around; margin-bottom: 40px; }
-        .stat-card { padding: 20px; border: 1px solid #ccc; border-radius: 8px; text-align: center; }
-        .stat-card h3 { margin-top: 0; }
-    </style>
-</head>
+
+<head th:replace="~{fragments/_header :: page_head('Dashboard')}"></head>
+
 <body>
-<div class="dashboard-container">
-    <h1>My Learning Dashboard</h1>
-    <a th:href="@{/}">Back to Home</a>
+<div th:replace="~{fragments/_header :: navbar}"></div>
 
-    <div class="stats-summary">
-        <div class="stat-card">
-            <h3>Total Lists</h3>
-            <p id="total-lists">Loading...</p>
+<main class="container">
+    <h1 class="mb-4">My Learning Dashboard</h1>
+
+    <div class="row g-4">
+        <!-- CỘT BÊN TRÁI: THỐNG KÊ SRS VÀ HOẠT ĐỘNG GẦN ĐÂY -->
+        <div class="col-lg-8">
+            <!-- Card ôn tập -->
+            <div class="card text-white bg-primary mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Time to Review!</h5>
+                    <p class="card-text fs-4">You have <b id="words-to-review">...</b> words ready for practice.</p>
+                    <!-- Nút này cần dẫn đến một trang ôn tập đặc biệt -->
+                    <a href="#" class="btn btn-light">Start Review Session</a>
+                </div>
+            </div>
+
+            <!-- Card hoạt động 7 ngày -->
+            <div class="card mb-4">
+                <div class="card-header">Learning Activity (Last 7 Days)</div>
+                <div class="card-body">
+                    <canvas id="learningActivityChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Card từ mới thêm gần đây -->
+            <div class="card">
+                <div class="card-header">Recently Added Words</div>
+                <ul class="list-group list-group-flush" id="recently-added-list">
+                    <!-- JS sẽ điền vào đây -->
+                </ul>
+            </div>
         </div>
-        <div class="stat-card">
-            <h3>Total Unique Words</h3>
-            <p id="total-unique-words">Loading...</p>
+
+        <!-- CỘT BÊN PHẢI: TỔNG QUAN -->
+        <div class="col-lg-4">
+            <!-- Card phân loại từ vựng -->
+            <div class="card mb-4">
+                <div class="card-header">Vocabulary Breakdown</div>
+                <div class="card-body">
+                    <canvas id="srsBreakdownChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Card thống kê tổng quan -->
+            <div class="card">
+                <div class="card-header">Overall Stats</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Total Unique Words
+                        <span class="badge bg-primary rounded-pill" id="total-unique-words">...</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Total Lists
+                        <span class="badge bg-primary rounded-pill" id="total-lists">...</span>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
+</main>
 
-    <div>
-        <h3>Words per List</h3>
-        <!-- Thẻ canvas này là nơi biểu đồ sẽ được vẽ -->
-        <canvas id="wordsPerListChart"></canvas>
-    </div>
-</div>
+<div th:replace="~{fragments/_footer :: page_footer}"></div>
+<div th:replace="~{fragments/_footer :: bootstrap_script}"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Đảm bảo script chỉ chạy sau khi trang đã tải xong
     document.addEventListener('DOMContentLoaded', function() {
-        // Gọi API backend
         fetch('/dashboard/stats')
             .then(response => response.json())
             .then(data => {
-                // Cập nhật các số liệu đơn giản
-                document.getElementById('total-lists').innerText = data.totalLists;
+                // Cập nhật các thẻ số liệu
                 document.getElementById('total-unique-words').innerText = data.totalUniqueWords;
+                document.getElementById('total-lists').innerText = data.totalLists;
+                document.getElementById('words-to-review').innerText = data.wordsToReviewToday;
 
-                // Chuẩn bị dữ liệu cho biểu đồ
-                const ctx = document.getElementById('wordsPerListChart').getContext('2d');
-                const labels = Object.keys(data.wordsPerList);
-                const chartData = Object.values(data.wordsPerList);
+                // Điền danh sách từ mới
+                const recentList = document.getElementById('recently-added-list');
+                if (data.recentlyAddedWords.length > 0) {
+                    data.recentlyAddedWords.forEach(word => {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item';
+                        li.innerText = word;
+                        recentList.appendChild(li);
+                    });
+                } else {
+                    recentList.innerHTML = '<li class="list-group-item text-muted">No recent activity.</li>';
+                }
 
-                // Tạo biểu đồ
-                new Chart(ctx, {
-                    type: 'bar', // Loại biểu đồ là cột
+                // Vẽ biểu đồ phân loại SRS (Doughnut Chart)
+                const srsCtx = document.getElementById('srsBreakdownChart').getContext('2d');
+                new Chart(srsCtx, {
+                    type: 'doughnut',
                     data: {
-                        labels: labels,
+                        labels: Object.keys(data.wordsBySrsLevel),
                         datasets: [{
-                            label: '# of Words',
-                            data: chartData,
-                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
+                            data: Object.values(data.wordsBySrsLevel),
+                            backgroundColor: ['#0d6efd', '#ffc107', '#fd7e14', '#198754'],
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+
+                // Vẽ biểu đồ hoạt động 7 ngày (Bar Chart)
+                const activityCtx = document.getElementById('learningActivityChart').getContext('2d');
+                new Chart(activityCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.wordsLearnedLast7Days.map(d => new Date(d.date).toLocaleDateString('en-US', { weekday: 'short' })),
+                        datasets: [{
+                            label: 'Words Added',
+                            data: data.wordsLearnedLast7Days.map(d => d.count),
+                            backgroundColor: 'rgba(13, 110, 253, 0.5)',
+                            borderColor: 'rgba(13, 110, 253, 1)',
                             borderWidth: 1
                         }]
                     },
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
-                    }
+                    options: { scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
                 });
             })
             .catch(error => console.error('Error fetching dashboard stats:', error));
