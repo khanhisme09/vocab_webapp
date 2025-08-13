@@ -1,33 +1,80 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/_header :: page_head('Login')}"></head>
+
 <body>
-<h1>Login</h1>
-<div th:if="${param.error}">
-    <p style="color: red;">Invalid username or password.</p>
-</div>
-<div th:if="${param.logout}">
-    <p>You have been logged out.</p>
+
+<!-- Toast thông báo đăng ký thành công -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+    <div id="registerSuccessToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                🎉 Registration successful! You can now log in.
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
 </div>
 
-<form th:action="@{/login}" method="post">
-    <div>
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-    </div>
-    <div>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-    </div>
-    <div>
-        <label>
-            <input type="checkbox" name="remember-me">
-            Remember me
-        </label>
-    </div>
-    <button type="submit">Log In</button>
-</form>
 
-<p>Don't have an account? <a th:href="@{/register}">Register here</a></p>
+<div th:replace="~{fragments/_header :: navbar}"></div>
+
+<main class="container">
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-6 col-lg-5">
+            <div class="card auth-card">
+                <div class="card-body p-4 p-md-5">
+                    <h2 class="card-title text-center mb-4">Welcome Back!</h2>
+
+                    <div th:if="${param.error}" class="alert alert-danger" role="alert">
+                        Invalid username or password.
+                    </div>
+                    <div th:if="${param.logout}" class="alert alert-success" role="alert">
+                        You have been logged out.
+                    </div>
+
+                    <form th:action="@{/login}" method="post">
+                        <div class="form-floating mb-3">
+                            <input type="text" id="username" name="username" class="form-control" placeholder="Username" required autofocus>
+                            <label for="username">Username</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+                            <label for="password">Password</label>
+                        </div>
+
+                        <div>
+                            <label>
+                                <input type="checkbox" name="remember-me"> Remember me
+                            </label>
+                        </div>
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Log In</button>
+                        </div>
+                    </form>
+                    <hr class="my-4">
+                    <div class="text-center">
+                        <p class="mb-0">Don't have an account? <a th:href="@{/register}" class="fw-bold">Sign up</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/_footer :: page_footer}"></div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("registered") === "true") {
+            const toastEl = document.getElementById('registerSuccessToast');
+            if (toastEl) {
+                const toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            }
+        }
+    });
+</script>
 </body>
-
 </html>

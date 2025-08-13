@@ -34,7 +34,8 @@ public class UserController {
         try {
             userService.registerUser(user);
             // Sau khi đăng ký thành công, chuyển hướng đến trang đăng nhập
-            return "redirect:/login";
+//            return "redirect:/login";
+            return "redirect:/login?registered=true";
         } catch (IllegalStateException e) {
             // Nếu có lỗi (ví dụ username đã tồn tại), quay lại trang đăng ký
             // (Trong một ứng dụng thực tế, bạn nên thêm thông báo lỗi)

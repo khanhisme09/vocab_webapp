@@ -91,3 +91,17 @@ h1, h2, h3, h4, h5, h6, .fw-bold, b {
 .navbar .btn.btn-primary {
     padding: 0.4rem 1rem;
 }
+
+/*
+====================================================================
+AUTH PAGE STYLES (Login, Register)
+====================================================================
+*/
+.auth-card {
+    border: none; /* Bỏ viền mặc định của card */
+    box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,.1); /* Đổ bóng mềm mại */
+}
+
+.auth-card .card-title {
+    font-weight: 700; /* Bold */
+}

@@ -28,7 +28,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         // Cho phép tất cả mọi người truy cập các URL này
-                        .requestMatchers("/", "/search", "/register", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/", "/search", "/register", "/css/**", "/js/**","/test-toast").permitAll()
                         // Tất cả các request còn lại đều cần phải được xác thực (đăng nhập)
                         .anyRequest().authenticated()
                 )
