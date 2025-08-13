@@ -16,23 +16,23 @@
             <div class="card text-white bg-primary mb-4">
                 <div class="card-body">
                     <h5 class="card-title">Time to Review!</h5>
-                    <p class="card-text fs-4">You have <b id="words-to-review">...</b> words ready for practice.</p>
-                    <!-- Nút này cần dẫn đến một trang ôn tập đặc biệt -->
-                    <a href="#" class="btn btn-light">Start Review Session</a>
+                    <p class="card-text fs-5">You have <b id="words-to-review">...</b> words ready for practice.</p>
                 </div>
             </div>
 
             <!-- Card hoạt động 7 ngày -->
             <div class="card mb-4">
-                <div class="card-header">Learning Activity (Last 7 Days)</div>
+                <div class="card-header fw-bold">Learning Activity (Last 7 Days)</div>
                 <div class="card-body">
                     <canvas id="learningActivityChart"></canvas>
                 </div>
             </div>
 
             <!-- Card từ mới thêm gần đây -->
-            <div class="card">
-                <div class="card-header">Recently Added Words</div>
+            <div class="card " >
+                <div class="card-header" style="background-color: #0d6efd; color: white;">
+                    <span class="fw-bold fs-5">Recently Added Words</span>
+                </div>
                 <ul class="list-group list-group-flush" id="recently-added-list">
                     <!-- JS sẽ điền vào đây -->
                 </ul>
@@ -43,7 +43,7 @@
         <div class="col-lg-4">
             <!-- Card phân loại từ vựng -->
             <div class="card mb-4">
-                <div class="card-header">Vocabulary Breakdown</div>
+                <div class="card-header fw-bold">Vocabulary Breakdown</div>
                 <div class="card-body">
                     <canvas id="srsBreakdownChart"></canvas>
                 </div>
@@ -51,7 +51,7 @@
 
             <!-- Card thống kê tổng quan -->
             <div class="card">
-                <div class="card-header">Overall Stats</div>
+                <div class="card-header fw-bold">Overall Stats</div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         Total Unique Words
@@ -80,6 +80,11 @@
                 document.getElementById('total-unique-words').innerText = data.totalUniqueWords;
                 document.getElementById('total-lists').innerText = data.totalLists;
                 document.getElementById('words-to-review').innerText = data.wordsToReviewToday;
+
+                // const reviewBtn = document.getElementById('start-review-btn');
+                // if (data.wordsToReviewToday > 0) {
+                //     reviewBtn.disabled = false;
+                // }
 
                 // Điền danh sách từ mới
                 const recentList = document.getElementById('recently-added-list');
