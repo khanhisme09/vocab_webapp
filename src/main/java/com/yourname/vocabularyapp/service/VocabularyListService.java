@@ -12,6 +12,7 @@ import com.yourname.vocabularyapp.repository.WordRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class VocabularyListService {
@@ -44,9 +45,11 @@ public class VocabularyListService {
     /**
      * Thêm một từ vào một list (tạo list mới nếu cần).
      * Phương thức này đã được cập nhật để tạo một Entity trung gian ListWord.
+     *
+     * @return
      */
     @Transactional
-    public void addWordToList(String wordText, Long listId, String newListName, String username) {
+    public Map<String, Object> addWordToList(String wordText, Long listId, String newListName, String username) {
         // --- Bước 1: Lấy các đối tượng cần thiết ---
         User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -98,6 +101,11 @@ public class VocabularyListService {
             list.getListWords().add(newListWord);
             listRepository.save(list);
         }
+        return Map.of(
+                "status", alreadyExists ? "exists" : "success",
+                "word", word.getWordText(),
+                "listName", list.getName()
+        );
     }
 
     @Transactional
@@ -139,5 +147,18 @@ public class VocabularyListService {
 
         list.setName(newName);
         listRepository.save(list);
+    }
+
+    @Transactional
+    public void deleteList(Long listId, String username) {
+        VocabularyList list = listRepository.findById(listId)
+                .orElseThrow(() -> new RuntimeException("List not found"));
+
+        // CỰC KỲ QUAN TRỌNG: Kiểm tra quyền sở hữu trước khi xóa
+        if (!list.getUser().getUsername().equals(username)) {
+            throw new SecurityException("User does not have permission to delete this list");
+        }
+
+        listRepository.delete(list);
     }
 }

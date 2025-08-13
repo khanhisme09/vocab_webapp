@@ -4,6 +4,17 @@
     --light-blue-bg: #f5faff;
     --text-color: #21252;
     --white-bg: #ffffff;
+    --text-muted: #6c757d;
+
+    --toast-success-bg: #28a745;
+    --toast-success-text: #ffffff;
+
+    --toast-warning-bg: #ffc107;
+    --toast-warning-text: #212529;
+
+    --toast-danger-bg: #dc3545;
+    --toast-danger-text: #ffffff;
+
 }
 
 body {
@@ -104,4 +115,88 @@ AUTH PAGE STYLES (Login, Register)
 
 .auth-card .card-title {
     font-weight: 700; /* Bold */
+}
+
+/*
+====================================================================
+WORD DETAILS PAGE STYLES
+====================================================================
+*/
+
+/* Tùy chỉnh Accordion của Bootstrap */
+.accordion-button {
+    font-weight: 600; /* Semi-bold */
+}
+
+/* Khi một mục accordion được mở, làm cho nút header có màu xanh */
+.accordion-button:not(.collapsed) {
+    color: var(--primary-color);
+    background-color: #e7f3ff; /* Màu xanh rất nhạt */
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .125);
+}
+
+.accordion-button:focus {
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* Style cho câu ví dụ */
+.example-quote {
+    border-left: 3px solid #ccc;
+    padding-left: 1rem;
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+/*
+====================================================================
+CUSTOM TOAST STYLES
+====================================================================
+*/
+
+/* Ghi đè class nền của Bootstrap */
+.toast.bg-success {
+    background-color: var(--toast-success-bg) !important; /* !important để đảm bảo quy tắc được ưu tiên */
+    color: var(--toast-success-text) !important;
+}
+
+.toast.bg-warning {
+    background-color: var(--toast-warning-bg) !important;
+    color: var(--toast-warning-text) !important;
+}
+
+.toast.bg-danger {
+    background-color: var(--toast-danger-bg) !important;
+    color: var(--toast-danger-text) !important;
+}
+
+/*
+   Tùy chỉnh nút 'x' (close) để nó có màu phù hợp với màu chữ mới.
+   Bootstrap dùng một SVG filter để tạo màu cho nút close,
+   vì vậy chúng ta cần ghi đè filter đó.
+*/
+.toast.bg-warning .btn-close {
+    /* Filter để đổi màu icon 'x' thành màu đen */
+    filter: invert(0%) sepia(8%) saturate(228%) hue-rotate(314deg) brightness(97%) contrast(105%);
+}
+
+
+/*
+====================================================================
+MY LISTS PAGE STYLES
+====================================================================
+*/
+.list-card .card-title {
+    font-weight: 700; /* Bold */
+}
+
+.list-card .sample-words-list {
+    font-size: 0.9em;
+    color: var(--text-muted);
+    padding-left: 1.2rem; /* Thụt vào một chút cho đẹp */
+    margin-bottom: 1rem;
+}
+
+/* Tùy chỉnh nút dropdown actions */
+.actions-dropdown .dropdown-toggle::after {
+    display: none; /* Ẩn mũi tên mặc định của dropdown */
 }

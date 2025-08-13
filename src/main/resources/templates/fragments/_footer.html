@@ -1,27 +1,40 @@
+<!-- File này chỉ chứa các fragment, không có <html> hay <body> -->
+
 <div th:fragment="page_footer" class="container">
     <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
         <p class="col-md-4 mb-0 text-body-secondary">&copy; 2025 VocabMaster, Inc</p>
         <ul class="nav col-md-4 justify-content-end">
-            <li class="nav-item">
-                <a th:href="@{/}" class="nav-link px-2 text-body-secondary">Home</a>
-            </li>
+            <li class="nav-item"><a th:href="@{/}" class="nav-link px-2 text-body-secondary">Home</a></li>
         </ul>
     </footer>
+</div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-            crossorigin="anonymous"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // Kiểm tra tham số URL ?success=true (set từ controller khi đăng ký thành công)
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get("success") === "true") {
-                const toastEl = document.getElementById('registerSuccessToast');
-                const toast = new bootstrap.Toast(toastEl);
-                toast.show();
+<!-- Script của Bootstrap -->
+<script th:fragment="bootstrap_script" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- ==================== LOGIC TOAST TOÀN CỤC ==================== -->
+<th:block th:fragment="toast_logic">
+    <!-- Tải file handler -->
+    <script th:src="@{/js/toast-handler.js}"></script>
+    <!-- Script inline để đọc flash attributes từ model và gọi handler -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const successMessage = /*[[${toast_success}]]*/ null;
+        const warningMessage = /*[[${toast_warning}]]*/ null;
+        const errorMessage = /*[[${toast_error}]]*/ null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Logic giờ chỉ là kiểm tra và hiển thị, không cần lắp ráp gì nữa
+            if (successMessage) {
+                showToast(successMessage, 'success');
+            }
+            if (warningMessage) {
+                showToast(warningMessage, 'warning');
+            }
+            if (errorMessage) {
+                showToast(errorMessage, 'danger');
             }
         });
+        /*]]>*/
     </script>
-
-</div>
+</th:block>

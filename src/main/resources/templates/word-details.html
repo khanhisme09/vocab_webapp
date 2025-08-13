@@ -1,123 +1,206 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head>
-    <meta charset="UTF-8">
-    <title>Word Details</title>
-    <style>
-        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; }
-        .word-header h1 { display: inline; margin-right: 20px;}
-        .phonetic { color: #555; }
-        .meaning-block { border-left: 4px solid #007bff; padding-left: 20px; margin-top: 30px; }
-        h3 { font-style: italic; color: #333; }
-        ul { list-style-type: disc; padding-left: 20px; }
-        li { margin-bottom: 10px; }
-        .example { color: #777; font-style: italic; margin-top: 5px; }
-        .error { color: red; }
-        a { color: #007bff; text-decoration: none; }
-        .save-form { margin-top: 30px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
-    </style>
-</head>
+
+<head th:replace="~{fragments/_header :: page_head('Word Details')}"></head>
+
 <body>
-<a href="/">&larr; Back to Search</a>
+<div th:replace="~{fragments/_header :: navbar}"></div>
 
-<!-- Khối hiển thị lỗi -->
-<div th:if="${error}">
-    <h2 class="error" th:text="${error}">Error message will be here</h2>
-</div>
+<main class="container">
+    <!-- Hiển thị lỗi nếu không tìm thấy từ -->
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-<!-- Khối hiển thị dữ liệu từ -->
-<div th:if="${wordData}">
-    <div class="word-header">
-        <h1 th:text="${wordData.word}">Word</h1>
-        <th:block th:each="phonetic : ${wordData.phonetics}">
-            <!-- Chỉ hiển thị khối này nếu có phiên âm dạng text -->
-            <div class.phonetic-block th:if="${phonetic.text}">
-                <span th:text="${phonetic.text}"></span>
-                <!-- Nút 1: Dùng link audio từ API nếu có -->
-                <button class="audio-btn" th:if="${phonetic.audio}" th:data-audio-url="${phonetic.audio}">🔊</button>
-                <!-- Nút 2: Dùng Web Speech API nếu không có link -->
-                <button class="audio-btn" th:unless="${phonetic.audio}" th:data-word="${wordData.word}">🔊</button>
-            </div>
-        </th:block>
-    </div>
-
-    <!-- ========== KHỐI THAY ĐỔI CHÍNH BẮT ĐẦU TỪ ĐÂY ========== -->
-    <div sec:authorize="isAuthenticated()" class="save-form">
-        <h3>Save this word</h3>
-        <form th:action="@{/my-lists/add-word}" method="post">
-            <input type="hidden" name="word" th:value="${wordData.word}">
-
-            <div>
-                <input type="radio" id="choice-existing" name="listChoice" value="existing" checked onchange="toggleListInput()">
-                <label for="choice-existing">Add to existing list:</label>
-                <label for="list-select"></label><select name="listId" id="list-select">
-                    <option th:if="${#lists.isEmpty(userLists)}" disabled>You have no lists yet</option>
-                    <option th:each="list : ${userLists}" th:value="${list.id}" th:text="${list.name}">List Name</option>
-                </select>
-            </div>
-
-            <div>
-                <input type="radio" id="choice-new" name="listChoice" value="new" onchange="toggleListInput()">
-                <label for="choice-new">Create a new list:</label>
-                <input type="text" name="newListName" id="new-list-name" placeholder="Enter new list name..." style="display:none;">
-            </div>
-
-            <button type="submit" style="margin-top: 10px;">Save Word</button>
-        </form>
-
-        <script>
-            function toggleListInput() {
-                if (document.getElementById('choice-new').checked) {
-                    document.getElementById('new-list-name').style.display = 'inline-block';
-                    document.getElementById('list-select').disabled = true;
-                    document.getElementById('new-list-name').required = true;
-                } else {
-                    document.getElementById('new-list-name').style.display = 'none';
-                    document.getElementById('list-select').disabled = false;
-                    document.getElementById('new-list-name').required = false;
-                }
-            }
-            toggleListInput();
-        </script>
-    </div>
-    <!-- ========== KẾT THÚC KHỐI THAY ĐỔI ========== -->
-
-    <div th:each="meaning : ${wordData.meanings}" class="meaning-block">
-        <h3 th:text="${meaning.partOfSpeech}">Part of Speech</h3>
-        <ul>
-            <li th:each="def : ${meaning.definitions}">
-                <span th:text="${def.definition}">This is the definition of the word.</span>
-                <div th:if="${def.example}" class="example">
-                    " <span th:text="${def.example}">Example sentence.</span> "
+    <div th:if="${wordData}">
+        <!-- ==================== KHỐI HEADER MỚI ==================== -->
+        <div class="p-4 mb-4 bg-white rounded-3 border">
+            <!-- Dùng Flexbox để căn chỉnh các mục trên cùng một hàng -->
+            <div class="d-flex justify-content-between align-items-center">
+                <!-- Tiêu đề và phiên âm -->
+                <div>
+                    <h1 class="display-5 fw-bold" th:text="${wordData.word}">Word</h1>
+                    <div th:each="phonetic : ${wordData.phonetics}" th:if="${phonetic.text}"
+                         class="d-inline-flex align-items-center me-3">
+                        <span class="fs-4 text-muted" th:text="${phonetic.text}"></span>
+                        <button class="audio-btn btn btn-link" th:if="${phonetic.audio}"
+                                th:data-audio-url="${phonetic.audio}">🔊
+                        </button>
+                        <button class="audio-btn btn btn-link" th:unless="${phonetic.audio}"
+                                th:data-word="${wordData.word}">🔊
+                        </button>
+                    </div>
                 </div>
-            </li>
-        </ul>
+
+                <!-- Nút Save với Dropdown Menu (Cực kỳ gọn gàng) -->
+                <div class="dropdown">
+                    <button id="save-word-btn" class="btn btn-success btn-lg dropdown-toggle" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false"
+                            th:data-authenticated="${#authorization.expression('isAuthenticated()')}">
+                        <i class="bi bi-bookmark-plus-fill me-2"></i> Save Word
+                    </button>
+
+                    <!-- ==================== DROPDOWN MENU MỚI ==================== -->
+                    <div class="dropdown-menu p-3" style="width: 300px;" sec:authorize="isAuthenticated()">
+                        <form id="save-word-form" th:action="@{/my-lists/add-word}" method="post">
+                            <input type="hidden" name="word" th:value="${wordData.word}">
+
+                            <!-- Phần chọn list hiện có -->
+                            <div class="mb-3">
+                                <label for="list-select" class="form-label">Add to list</label>
+                                <select name="listId" id="list-select" class="form-select">
+                                    <option value="">-- Select a list --</option>
+                                    <option th:each="list : ${userLists}" th:value="${list.id}" th:text="${list.name}">
+                                        List Name
+                                    </option>
+                                    <!-- LỰA CHỌN ĐẶC BIỆT ĐỂ TẠO LIST MỚI -->
+                                    <option value="CREATE_NEW_LIST">+ Create a new list</option>
+                                </select>
+                            </div>
+
+                            <!-- Form tạo list mới - Mặc định bị ẩn -->
+                            <div id="new-list-section" class="mb-3 d-none">
+                                <label for="new-list-name" class="form-label">New list name</label>
+                                <input type="text" name="newListName" class="form-control" id="new-list-name"
+                                       placeholder="e.g., 'Business English'">
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== KHỐI ĐỊNH NGHĨA (GIỜ CHIẾM TOÀN BỘ CHIỀU RỘNG) ==================== -->
+        <div class="accordion" id="definitionsAccordion">
+            <div th:each="meaning, iterStat : ${wordData.meanings}" class="accordion-item">
+                <h2 class="accordion-header" th:id="'heading-' + ${iterStat.index}">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                            th:data-bs-target="'#collapse-' + ${iterStat.index}" aria-expanded="true"
+                            th:text="${meaning.partOfSpeech}">
+                        Part of Speech
+                    </button>
+                </h2>
+                <div th:id="'collapse-' + ${iterStat.index}" class="accordion-collapse collapse show"
+                     th:aria-labelledby="'heading-' + ${iterStat.index}" data-bs-parent="#definitionsAccordion">
+                    <div class="accordion-body">
+                        <div th:each="def, defStat : ${meaning.definitions}" class="mb-3">
+                            <p>
+                                <strong th:text="${defStat.count} + '. '"></strong>
+                                <span th:text="${def.definition}"></span>
+                            </p>
+                            <figure th:if="${def.example}" class="ms-4">
+                                <blockquote class="blockquote example-quote">
+                                    <p th:text="${def.example}"></p>
+                                </blockquote>
+                            </figure>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Modal thông báo yêu cầu đăng nhập (giữ nguyên) -->
+<div class="modal fade" id="loginRequiredModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Login Required</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>You need to be logged in to save words and create lists.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a th:href="@{/login}" class="btn btn-primary">Go to Login</a>
+            </div>
+        </div>
     </div>
 </div>
-<script>
 
-    document.addEventListener('click', (event) => {
-        if (!event.target.classList.contains('audio-btn')) return;
+<div th:replace="~{fragments/_footer :: page_footer}"></div>
 
-        const audioUrl = event.target.dataset.audioUrl;
-        const word = event.target.dataset.word;
-        const audioPlayer = new Audio();
+<script th:src="@{/js/audio-player.js}"></script>
+<div th:replace="~{fragments/_footer :: page_footer}"></div>
+<div th:replace="~{fragments/_footer :: bootstrap_script}"></div>
 
-        if (audioUrl) {
-            audioPlayer.src = audioUrl;
-            audioPlayer.play();
-        } else if (word) {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(word);
-                utterance.lang = 'en-US';
-                window.speechSynthesis.speak(utterance);
-            } else {
-                alert('Your browser does not support Text-to-Speech.');
+<!-- Gọi logic toast toàn cục -->
+<div th:replace="~{fragments/_footer :: toast_logic}"></div>
+
+<!-- Script riêng của trang (nếu có) -->
+<th:block th:fragment="page_scripts">
+    <script th:src="@{/js/audio-player.js}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- LOGIC 1: Xử lý nút Save cho người dùng chưa đăng nhập ---
+            const saveButton = document.getElementById('save-word-btn');
+
+            if (saveButton) {
+                // Lắng nghe sự kiện click trên nút "Save Word"
+                saveButton.addEventListener('click', (event) => {
+                    const isAuthenticated = saveButton.dataset.authenticated === 'true';
+
+                    if (!isAuthenticated) {
+                        // Nếu chưa đăng nhập:
+                        // 1. Ngăn chặn hành vi mặc định (mở dropdown)
+                        event.preventDefault();
+                        event.stopPropagation();
+
+                        // 2. Lấy và hiển thị modal yêu cầu đăng nhập
+                        const loginModal = new bootstrap.Modal(document.getElementById('loginRequiredModal'));
+                        loginModal.show();
+                    }
+                    // Nếu đã đăng nhập, không làm gì cả, để Bootstrap tự xử lý việc mở dropdown.
+                });
             }
-        }
-    });
 
 
+            // --- LOGIC 2: Xử lý dropdown để tạo list mới (chỉ chạy khi người dùng đã đăng nhập) ---
+            const listSelect = document.getElementById('list-select');
+            const newListSection = document.getElementById('new-list-section');
+            const newListNameInput = document.getElementById('new-list-name');
+            const saveWordForm = document.getElementById('save-word-form');
+
+            // Chỉ gắn sự kiện nếu các phần tử này tồn tại (tức là người dùng đã đăng nhập)
+            if (listSelect && newListSection && newListNameInput) {
+                listSelect.addEventListener('change', () => {
+                    const isCreatingNew = listSelect.value === 'CREATE_NEW_LIST';
+
+                    // Ẩn/hiện ô nhập liệu cho list mới
+                    newListSection.classList.toggle('d-none', !isCreatingNew);
+                    // Bắt buộc nhập tên nếu đang tạo mới
+                    newListNameInput.required = isCreatingNew;
+                });
+            }
+
+            // (Tùy chọn) Kiểm tra form trước khi submit để đảm bảo người dùng đã chọn gì đó
+            if (saveWordForm) {
+                saveWordForm.addEventListener('submit', (event) => {
+                    const selectedListId = listSelect.value;
+                    const newListName = newListNameInput.value.trim();
+
+                    // Nếu người dùng chọn tạo mới nhưng không nhập tên
+                    if (selectedListId === 'CREATE_NEW_LIST' && newListName === '') {
+                        alert('Please enter a name for the new list.');
+                        event.preventDefault(); // Ngăn form submit
+                        return; // Dừng lại
+                    }
+
+                    // Nếu người dùng không chọn list nào cả
+                    if (selectedListId === '') {
+                        alert('Please select a list or choose to create a new one.');
+                        event.preventDefault(); // Ngăn form submit
+                    }
+                });
+            }
+
+        });
 </script>
+</th:block>
 </body>
 </html>
