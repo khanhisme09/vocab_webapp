@@ -238,3 +238,169 @@ LIST DETAILS PAGE STYLES
     padding-left: 1rem;
     border-left: 2px solid #e9ecef;
 }
+
+/*
+====================================================================
+FLASHCARDS PAGE STYLES
+====================================================================
+*/
+
+/* Áp dụng cho body của trang flashcard */
+body.flashcard-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #e9ecef; /* Một màu xám rất nhạt */
+    overflow: hidden; /* Tránh scrollbar không cần thiết */
+}
+
+.flashcard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 600px; /* Giới hạn chiều rộng tối đa */
+    padding: 20px;
+}
+
+.flashcard-scene {
+    width: 100%;
+    padding-top: 60%; /* Tỷ lệ thẻ 5:3 (600px * 60% = 360px) */
+    position: relative;
+    perspective: 1500px;
+    margin-bottom: 1.5rem;
+}
+
+.flashcard {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+    cursor: pointer;
+}
+
+.flashcard.is-flipped {
+    transform: rotateY(180deg);
+}
+
+.flashcard-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    box-sizing: border-box;
+    border-radius: 1rem;
+    background-color: #ffffff;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    color: #212529;
+}
+
+.flashcard-face--back {
+    transform: rotateY(180deg);
+    background-color: #f8f9fa;
+}
+
+.flashcard-face .word-text {
+    font-size: clamp(2rem, 5vw, 3.5rem); /* Kích thước chữ tự điều chỉnh */
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.flashcard-face .phonetic-block {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.2rem;
+    color: #6c757d;
+}
+
+.flashcard-face .definition-text {
+    font-size: clamp(1.2rem, 3vw, 1.5rem); /* Kích thước chữ tự điều chỉnh */
+    line-height: 1.6;
+    text-align: center;
+}
+
+.flashcard-progress-bar {
+    height: 8px;
+    background-color: #dee2e6;
+    border-radius: 4px;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.flashcard-progress-bar .progress-fill {
+    height: 100%;
+    background-color: var(--primary-color);
+    border-radius: 4px;
+    width: 0%; /* Bắt đầu từ 0 */
+    transition: width 0.3s ease-out;
+}
+
+/*
+====================================================================
+QUIZ PAGE STYLES
+====================================================================
+*/
+body.quiz-page {
+    background-color: #e9ecef; /* Nền xám nhạt cho không gian tập trung */
+}
+
+.quiz-container {
+    max-width: 800px;
+    margin: auto;
+}
+
+/* Ẩn tất cả các câu hỏi ngoại trừ câu đầu tiên */
+/*.question-card:not(:first-child) {*/
+/*    display: none;*/
+/*}*/
+
+.quiz-option {
+    display: block;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.quiz-option:hover {
+    background-color: #f8f9fa;
+    border-color: #adb5bd;
+}
+
+/* Style cho các trạng thái trả lời */
+.quiz-option.selected {
+    background-color: #e7f3ff;
+    border-color: var(--primary-color);
+}
+.quiz-option.correct {
+    background-color: #d1e7dd; /* Bootstrap success bg */
+    border-color: #badbcc;
+}
+.quiz-option.incorrect {
+    background-color: #f8d7da; /* Bootstrap danger bg */
+    border-color: #f5c2c7;
+}
+
+/* Vô hiệu hóa click sau khi đã trả lời */
+.options-container.answered .quiz-option {
+    pointer-events: none;
+    opacity: 0.7;
+}
+.options-container.answered .quiz-option.correct {
+    opacity: 1; /* Làm nổi bật đáp án đúng */
+}

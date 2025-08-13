@@ -6,6 +6,8 @@ import com.yourname.vocabularyapp.model.Word; // Import thêm
 import com.yourname.vocabularyapp.repository.VocabularyListRepository;
 // BỎ DictionaryService vì không cần gọi API nữa
 // import com.yourname.vocabularyapp.service.DictionaryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +19,9 @@ import java.util.List;
 
 @Controller
 public class FlashcardController {
+
+
+    private static final Logger logger = LoggerFactory.getLogger(FlashcardController.class);
 
     private final VocabularyListRepository listRepository;
     // Không cần DictionaryService nữa vì mọi dữ liệu đã được lưu trong CSDL
@@ -32,7 +37,6 @@ public class FlashcardController {
 
         List<FlashcardDto> flashcardDtos = new ArrayList<>();
 
-        // LẶP QUA CÁC TỪ VÀ LẤY DỮ LIỆU ĐÃ LƯU TRONG CSDL
         for (var listWord : list.getListWords()) {
             Word word = listWord.getWord();
 
@@ -41,11 +45,14 @@ public class FlashcardController {
                 flashcardDtos.add(new FlashcardDto(
                         word.getWordText(),
                         word.getCachedDefinition(),
-                        word.getPhonetic(),     // Lấy phiên âm đã lưu
-                        word.getAudioUrl()      // Lấy link audio đã lưu
+                        word.getPhonetic(),
+                        word.getAudioUrl()
                 ));
             }
         }
+
+        // ==================== THÊM LOG Ở ĐÂY ====================
+        logger.info("Created {} flashcards for list '{}' (ID: {})", flashcardDtos.size(), list.getName(), listId);
 
         model.addAttribute("flashcards", flashcardDtos);
         model.addAttribute("listName", list.getName());

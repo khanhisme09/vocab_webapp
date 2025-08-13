@@ -1,11 +1,38 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<body>
-<h1>Quiz Result</h1>
-<h2>You scored: <span th:text="${result.score}">0</span> out of <span th:text="${result.totalQuestions}">0</span></h2>
 
-<a th:href="@{/quiz}">Try another quiz</a>
-<br>
-<a th:href="@{/}">Back to Home</a>
+<head th:replace="~{fragments/_header :: page_head('Quiz Result')}"></head>
+
+<body class="quiz-page">
+<div th:replace="~{fragments/_header :: navbar}"></div>
+
+<main class="container text-center py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-success shadow">
+                <div class="card-header bg-success text-white">
+                    <h2>Quiz Complete!</h2>
+                </div>
+                <div class="card-body p-4">
+                    <h3 class="card-title">Your Score</h3>
+                    <p class="display-1 fw-bold my-3">
+                        <span th:text="${result.score}">0</span> / <span th:text="${result.totalQuestions}">0</span>
+                    </p>
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mt-4">
+                        <!-- Form để thử lại quiz -->
+                        <form th:action="@{/quiz/start}" method="post">
+                            <input type="hidden" name="listId" th:value="${listId}">
+                            <button type="submit" class="btn btn-primary btn-lg px-4 gap-3">Practice Again</button>
+                        </form>
+                        <a th:href="@{/my-lists/{listId}(listId=${listId})}" class="btn btn-outline-secondary btn-lg px-4">Back to List</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/_footer :: page_footer}"></div>
+<div th:replace="~{fragments/_footer :: bootstrap_script}"></div>
 </body>
 </html>
