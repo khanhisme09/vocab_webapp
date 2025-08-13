@@ -1,37 +1,87 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>My Vocabulary Lists</title>
-    <style>
-        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; }
-        h1 { color: #333; }
-        ul { list-style-type: none; padding: 0; }
-        li { background-color: #f9f9f9; border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
-        a { color: #007bff; text-decoration: none; font-weight: bold; font-size: 1.2em; }
-        a:hover { text-decoration: underline; }
-        .word-count { color: #555; }
-        .home-link { display: inline-block; margin-bottom: 20px; }
-    </style>
-</head>
+
+<head th:replace="~{fragments/_header :: page_head('My Lists')}"></head>
+
 <body>
-<h1>My Vocabulary Lists</h1>
-<a th:href="@{/}" class="home-link">&larr; Back to Home</a>
+<div th:replace="~{fragments/_header :: navbar}"></div>
 
-<ul>
-    <!--
-        THAY ĐỔI Ở ĐÂY:
-        - Biến lặp vẫn là 'list' trong 'lists'.
-        - Nhưng để đếm số từ, ta dùng #lists.size(list.listWords) thay vì list.words.
-    -->
-    <li th:each="list : ${lists}">
-        <a th:href="@{/my-lists/{listId}(listId=${list.id})}" th:text="${list.name}">List Name</a>
-        <span class="word-count" th:text="${#lists.size(list.listWords)} + ' words'">0 words</span>
-    </li>
-</ul>
+<main class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>My Vocabulary Lists</h1>
+        <!-- Nút này có thể dùng để tạo list mới trực tiếp trong tương lai -->
+        <!-- <a href="#" class="btn btn-primary">Create New List</a> -->
+    </div>
 
-<div th:if="${#lists.isEmpty(lists)}">
-    <p>You haven't created any vocabulary lists yet. <a th:href="@{/}">Go search for a word</a> to start a new list!</p>
-</div>
+    <!-- Hiển thị các list dưới dạng grid -->
+    <div th:if="${!#lists.isEmpty(lists)}" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <div th:each="list : ${lists}" class="col">
+            <div class="card h-100 shadow-sm list-card">
+                <div class="card-body d-flex flex-column">
+
+                    <div class="d-flex justify-content-between">
+                        <h5 class="card-title" th:text="${list.name}">List Name</h5>
+                        <!-- Menu hành động (...) -->
+                        <div class="dropdown actions-dropdown">
+                            <button class="btn btn-sm btn-link text-muted" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" th:href="@{/my-lists/{listId}(listId=${list.id})}"><i class="bi bi-pencil-square me-2"></i>Edit & View</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form th:action="@{/my-lists/{listId}/delete(listId=${list.id})}" method="post" onsubmit="return confirm('Are you sure you want to delete this list and all its words? This cannot be undone.');">
+                                        <button type="submit" class="dropdown-item text-danger"><i class="bi bi-trash me-2"></i>Delete List</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <p class="card-text text-muted small">
+                        <span th:text="${#lists.size(list.listWords)}">0</span> words
+                    </p>
+
+                    <!-- Hiển thị 3 từ mẫu -->
+                    <div th:if="${!#lists.isEmpty(list.listWords)}">
+                        <p class="small mb-1">Includes:</p>
+                        <ul class="list-unstyled sample-words-list">
+                            <!--
+                                Sử dụng một khối th:block để lặp.
+                                Bên trong, thẻ li chỉ được render nếu index < 3.
+                            -->
+                            <th:block th:each="listWord, iterStat : ${#lists.toList(list.listWords)}">
+                                <li th:if="${iterStat.index < 3}" th:text="${listWord.word.wordText}">
+                                    Sample word
+                                </li>
+                            </th:block>
+
+                            <li th:if="${#lists.size(list.listWords) > 3}">...and more</li>
+                        </ul>
+                    </div>
+
+                    <a th:href="@{/lists/{listId}/flashcards(listId=${list.id})}" class="btn btn-primary mt-auto">
+                        <i class="bi bi-layers-fill me-2"></i> Practice with Flashcards
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trạng thái rỗng được cải tiến -->
+    <div th:if="${#lists.isEmpty(lists)}" class="text-center mt-5 p-5 bg-light rounded-3">
+        <i class="bi bi-journal-x" style="font-size: 4rem; color: #6c757d;"></i>
+        <h2 class="mt-3">Your Lists are Empty</h2>
+        <p class="lead text-muted">You haven't created any vocabulary lists yet.</p>
+        <a th:href="@{/}" class="btn btn-primary btn-lg mt-3">
+            <i class="bi bi-search me-2"></i> Find Your First Word
+        </a>
+    </div>
+</main>
+
+<div th:replace="~{fragments/_footer :: page_footer}"></div>
+<div th:replace="~{fragments/_footer :: bootstrap_script}"></div>
+<div th:replace="~{fragments/_footer :: toast_logic}"></div>
+
 </body>
 </html>
